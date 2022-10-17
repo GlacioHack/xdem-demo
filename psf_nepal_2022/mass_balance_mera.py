@@ -37,12 +37,12 @@ plt.rcParams['image.interpolation'] = 'none'
 
 # #### Get input data path ###
 
-fn_dem_2012 = "../data/mb_Mera/2012-11-25_DEM_4m.tif"
-fn_dem_2018 = "../data/mb_Mera/2018-10-28_DEM_4m.tif"
-fn_ref_dem = "../data/mb_Mera/Mera_Co30_DEM_UTM45.tif"
-rgi_shpfile = "../data/mb_Mera/shapefile_RGI/Glacier_inventory_around_Mera.shp"
-mera_shpfile_2012 = "../data/mb_Mera/shapefiles/Mera_outline_2012_realigned.shp"
-mera_shpfile_2018 = "../data/mb_Mera/shapefiles/Mera_outline_2018_realigned.shp"
+fn_dem_2012 = "./data/mb_Mera/2012-11-25_DEM_4m.tif"
+fn_dem_2018 = "./data/mb_Mera/2018-10-28_DEM_4m.tif"
+fn_ref_dem = "./data/mb_Mera/Mera_Co30_DEM_UTM45.tif"
+rgi_shpfile = "./data/mb_Mera/shapefile_RGI/Glacier_inventory_around_Mera.shp"
+mera_shpfile_2012 = "./data/mb_Mera/shapefiles/Mera_outline_2012_realigned.shp"
+mera_shpfile_2018 = "./data/mb_Mera/shapefiles/Mera_outline_2018_realigned.shp"
 
 # #### Load all DEMs
 
