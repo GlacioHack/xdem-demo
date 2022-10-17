@@ -51,9 +51,11 @@ dem_2018 = xdem.DEM(fn_dem_2018)
 ref_dem = xdem.DEM(fn_ref_dem)
 
 # #### Crop and reproject DEMs on a same projection/grid
+# DEMs are downsampled to 8 m resolution, to reduce memory usage on Binder (limit 2 GB)
 
 bounds = gu.projtools.merge_bounds([dem_2012, dem_2018, ref_dem], merging_algorithm="intersection")
-dem_2018.crop(bounds)
+bounds = {"left": bounds[0], "bottom": bounds[1], "right": bounds[2], "top": bounds[3]}
+dem_2018 = dem_2018.reproject(dst_bounds=bounds, dst_res=8)
 dem_2012 = dem_2012.reproject(dst_ref=dem_2018)
 ref_dem = ref_dem.reproject(dst_ref=dem_2018)
 
@@ -97,6 +99,10 @@ outlier_mask = (np.abs(dh.data) < 50).filled(False)
 
 inlier_mask = ~gl_mask & slope_mask & outlier_mask
 plt.imshow(inlier_mask.squeeze())
+
+# Free memory
+
+del slope, slope_mask, outlier_mask
 
 # #### Run coregistration
 # We use the Nuth & Kaab (2011) algorithm to estimate a horizontal offset, then we remove a possible vertical bias by removing the median dh value in stable terrain.
