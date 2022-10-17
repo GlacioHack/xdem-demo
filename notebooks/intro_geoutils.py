@@ -15,7 +15,8 @@
 
 # # Manipulating raster/vector data with geoutils
 
-# xdem relies on a second library, developed by the same group of people, to easily handle raster and vector data: **geoutils !**
+# xdem relies on a second library, developed by the same group of people, to easily handle raster and vector data: **geoutils !** \
+# Documentation: https://geoutils.readthedocs.io
 
 # ### Import the necessary modules
 
@@ -28,6 +29,8 @@ import xdem
 # -
 
 # ### Download the sample data set (if not done already) - Should take a few seconds ###
+# The code comes with some data for showcasing the functionality, here two DEMs over Longyearbyen, Norway and glacier outlines over Svalbard. \
+# The files are already on disk, we only nned to find their location.
 
 xdem.examples.download_longyearbyen_examples(overwrite=False)
 print(xdem.examples.FILEPATHS_DATA["longyearbyen_ref_dem"])
@@ -67,11 +70,12 @@ outlines_1990.ds.plot()
 # - the raster width and height
 # - the pixel resolution
 # - the extent of the raster (called `bounds` in rasterio/geopandas)
-# - the position of one pixel, traditionally, the upper-left
+# - the position of one pixel, traditionally, the upper-left \
 # These variables are inter-dependent, e.g. if one knows the raster's extent and width and height, the pixel resolution is fixed.
 # All these variables are stored in the `xdem.DEM` instance with the following attributes:
 
-print(dem_2009.crs.to_proj4()); print(dem_2009.crs.to_wkt())
+print(f"As PROJ4 string: {dem_2009.crs.to_proj4()}\n")
+print(f"As WKT string: \n{dem_2009.crs.to_wkt()}")
 
 dem_2009.width
 
@@ -103,6 +107,7 @@ outlines_1990.ds
 # ## Rasters operations
 
 # ### Reproject the two DEMs on the same grid
+# Here the function returns a warning because the two DEMs are already on the same grid, so nothing is done.
 
 dem_1990 = dem_1990.reproject(dst_ref=dem_2009)
 print(dem_1990)
@@ -110,11 +115,17 @@ print(dem_2009)
 
 # ### Reproject to a given resolution, bounds, or CRS
 
+# Change pixel resolution
+
 dem_test = dem_1990.reproject(dst_res=60)
 print(dem_test.info())
 
+# Change extent/bounds
+
 dem_test = dem_1990.reproject(dst_bounds={"left":502810, "top":8674000, "right":529430, "bottom": 8654290})
 print(dem_test.info())
+
+# Change CRS
 
 dem_test = dem_1990.reproject(dst_crs='epsg:4326')
 print(dem_test.info())
@@ -129,7 +140,7 @@ ddem = dem_2009 - dem_1990
 
 # ### Plot the elevation change map
 # #### Note: 
-# - `ax` is used here the share the same subplot between the raster and outlines (the default is to create a new figure) 
+# - `ax` is used here to share the same subplot between the raster and outlines (the default is to create a new figure)
 # - ddem is plotted last, to preserve the extent, as glacier outlines cover all of Svalbard.
 # - zorder is used to plot in the right sequence (outlines on top)
 

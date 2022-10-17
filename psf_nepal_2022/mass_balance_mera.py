@@ -33,7 +33,12 @@ plt.rcParams['image.interpolation'] = 'none'
 # -
 
 
-# ## 1 - Load input data ###
+# ## 1 - Load input data
+#
+# All the data is taken from the Mera mass balance tutorial to be presented by Fanny on Thursday. They are already downloaded in the data folder.\
+# There are 2 Pleiades DEMs from November 2012 and October 2018 that are used to calculate the mass balance. They are at 4 m resolution.\
+# The 3rd DEM is used to calculate the glacier hypsometry, since it is gap-free. It is extracted from the Copernicus Global DEM at 30 m resolution.\
+# There are also manual outlines of Mera glacier for the same dates.
 
 # #### Get input data path ###
 
@@ -51,7 +56,8 @@ dem_2018 = xdem.DEM(fn_dem_2018)
 ref_dem = xdem.DEM(fn_ref_dem)
 
 # #### Crop and reproject DEMs on a same projection/grid
-# DEMs are downsampled to 8 m resolution, to reduce memory usage on Binder (limit 2 GB)
+# The intersection of all DEMs is calculated, and then DEMs are projected onto the 2018 DEM grid.\
+# Note: DEMs are downsampled to 8 m resolution, to reduce memory usage on Binder (limit 2 GB)
 
 bounds = gu.projtools.merge_bounds([dem_2012, dem_2018, ref_dem], merging_algorithm="intersection")
 bounds = {"left": bounds[0], "bottom": bounds[1], "right": bounds[2], "top": bounds[3]}
@@ -141,7 +147,7 @@ plt.tight_layout()
 # We see that elevation changes outside glaciers are close to zero (yellow color).
 
 # #### Calculate statistics of before/after coregistration
-# Because `dh.data` is a masked array, we use `compressed()` to output only unmaked values.
+# Because `dh.data` is a masked array, we use `compressed()` to output only unmasked values.
 
 # +
 inlier_orig = dh.data[inlier_mask].compressed()
@@ -238,3 +244,5 @@ print(f"Specific mass balance: {dh_mwe:.1f} m w.e.")
 # Can your reproduce the results of Wagnon et al. (2021), JoG. Check the methods to see what bin size and filtering method they used. Your results should match their +/- 0.03 m w.e..
 # 4. Try calculating the mass balance for another glacier.\
 # Hint 1: To select one glacier from the RGI outlines, use `rgi_outlines.ds[rgi_outlines.ds.RGIId == "YOUR_RGI_ID"]` where YOUR_RGI_ID is replaced by the ID of your chosen glacier, within the Pleiades DEM bounds.
+
+
