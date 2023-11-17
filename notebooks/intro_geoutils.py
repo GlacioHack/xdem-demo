@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.0
+#       jupytext_version: 1.15.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -15,7 +15,7 @@
 
 # # Manipulating raster/vector data with geoutils
 
-# xdem relies on a second library, developed by the same group of people, to easily handle raster and vector data: **geoutils !** \
+# **geoutils** was developed to easily handle raster and vector data\
 # Documentation: https://geoutils.readthedocs.io
 
 # ### Import the necessary modules
@@ -33,20 +33,20 @@ import xdem
 # The files are already on disk, we only nned to find their location.
 
 xdem.examples.download_longyearbyen_examples(overwrite=False)
-print(xdem.examples.FILEPATHS_DATA["longyearbyen_ref_dem"])
-print(xdem.examples.FILEPATHS_DATA["longyearbyen_tba_dem"])
-print(xdem.examples.FILEPATHS_DATA["longyearbyen_glacier_outlines"])
+print(xdem.examples.get_path("longyearbyen_ref_dem"))
+print(xdem.examples.get_path("longyearbyen_tba_dem"))
+print(xdem.examples.get_path("longyearbyen_glacier_outlines"))
 
 # ### Read the two DEMs and glacier outlines for the region ###
 
 # Raster files (e.g. GeoTiff) can be loaded in one line with `gu.Raster(path_to_file)`. In xdem, the DEM class inherit the same functionalities and more, so here we use `xdem.DEM`.
 
-dem_2009 = xdem.DEM(xdem.examples.FILEPATHS_DATA["longyearbyen_ref_dem"])
-dem_1990 = xdem.DEM(xdem.examples.FILEPATHS_DATA["longyearbyen_tba_dem"])
+dem_2009 = xdem.DEM(xdem.examples.get_path("longyearbyen_ref_dem"))
+dem_1990 = xdem.DEM(xdem.examples.get_path("longyearbyen_tba_dem"))
 
 # Vector files (e.g. ESRI shapefiles) can be loaded in one line with `gu.Vector(path_to_file)`.
 
-outlines_1990 = gu.Vector(xdem.examples.FILEPATHS_DATA["longyearbyen_glacier_outlines"])
+outlines_1990 = gu.Vector(xdem.examples.get_path("longyearbyen_glacier_outlines"))
 
 # ### Quickly visualize a raster
 # Since a Raster object comes with all atributes, it can be quickly plot with its georeferencing information.
@@ -60,7 +60,7 @@ dem_2009_hs.show(cmap='gray')
 
 # ### Quickly visualize vector data
 
-outlines_1990.ds.plot()
+outlines_1990.show()
 
 # ### Notes on the Raster and Vector classes
 #
@@ -91,7 +91,7 @@ dem_2009.transform
 
 # These information, and more, can all be obtained **at once** with the command
 
-print(dem_2009)
+print(dem_2009.info())
 
 # or similarly with `dem_2009.info()`.
 #
@@ -132,7 +132,7 @@ print(dem_test.info())
 
 # ### Reproject the outlines in the same coordinate system as DEMs
 
-outlines_proj = gu.Vector(outlines_1990.ds.to_crs(dem_2009.crs))
+outlines_proj = outlines_1990.reproject(dst_crs=dem_2009.crs)
 
 # ### Calculate the elevation change
 
@@ -148,8 +148,8 @@ ddem = dem_2009 - dem_1990
 vmax = max(abs(np.max(ddem.data)), abs(np.min(ddem.data)))
 
 ax = plt.subplot(111)
-outlines_proj.ds.plot(ax=ax, facecolor='none', edgecolor='k', zorder=2)
-ddem.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cb_title='Elevation change 2009 - 1990 (m)', zorder=1)
+outlines_proj.show(ax=ax, facecolor='none', edgecolor='k', zorder=2)
+ddem.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
 ax.set_title('Thinning glaciers near Longyearbyen')
 plt.tight_layout()
 plt.show()
@@ -163,17 +163,17 @@ ddem.save("temp_ddem.tif")
 # `glacier_mask` is `True` on glaciers, `False` elsewhere.
 
 glacier_mask = outlines_1990.create_mask(ddem)
-plt.imshow(glacier_mask.squeeze(), interpolation='none')
+glacier_mask.show(add_cbar=False)
 
 # ### Calculate mean dh over glaciers or stable terrain
 
 # Over glaciers:
 
-print(np.mean(ddem.data[glacier_mask]))
+print(np.mean(ddem[glacier_mask]))
 
 # Over stable terrain
 
-print(np.mean(ddem.data[~glacier_mask]))
+print(np.mean(ddem[~glacier_mask]))
 
 # Something is wrong, mean dh over stable terrain should be ~0 => we need to coregister the DEMs. 
 # This is some proper work for our next example !
