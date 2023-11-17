@@ -42,28 +42,17 @@ plt.rcParams['image.interpolation'] = 'none'
 
 # #### Get input data path ###
 
-fn_dem_2012 = "./data/mb_Mera/2012-11-25_DEM_4m.tif"
-fn_dem_2018 = "./data/mb_Mera/2018-10-28_DEM_4m.tif"
-fn_ref_dem = "./data/mb_Mera/Mera_Co30_DEM_UTM45.tif"
-rgi_shpfile = "./data/mb_Mera/shapefile_RGI/Glacier_inventory_around_Mera.shp"
-mera_shpfile_2012 = "./data/mb_Mera/shapefiles/Mera_outline_2012_realigned.shp"
-mera_shpfile_2018 = "./data/mb_Mera/shapefiles/Mera_outline_2018_realigned.shp"
+fn_dem_2012 = "../data/mb_Mera/2012-11-25_DEM_4m.tif"
+fn_dem_2018 = "../data/mb_Mera/2018-10-28_DEM_4m.tif"
+fn_ref_dem = "../data/mb_Mera/Mera_Co30_DEM_UTM45.tif"
+rgi_shpfile = "../data/mb_Mera/shapefile_RGI/Glacier_inventory_around_Mera.shp"
+mera_shpfile_2012 = "../data/mb_Mera/shapefiles/Mera_outline_2012_realigned.shp"
+mera_shpfile_2018 = "../data/mb_Mera/shapefiles/Mera_outline_2018_realigned.shp"
 
-# #### Load all DEMs
+# #### Load all DEMs at once, cropping to the common extent, and reprojecting onto the 2018 DEM grid
 
-dem_2012 = xdem.DEM(fn_dem_2012)
-dem_2018 = xdem.DEM(fn_dem_2018)
-ref_dem = xdem.DEM(fn_ref_dem)
+dem_2012, dem_2018, ref_dem = gu.raster.load_multiple_rasters([fn_dem_2012, fn_dem_2018, ref_dem], crop=True, ref_grid=1)
 
-# #### Crop and reproject DEMs on a same projection/grid
-# The intersection of all DEMs is calculated, and then DEMs are projected onto the 2018 DEM grid.\
-# Note: DEMs are downsampled to 8 m resolution, to reduce memory usage on Binder (limit 2 GB)
-
-bounds = gu.projtools.merge_bounds([dem_2012, dem_2018, ref_dem], merging_algorithm="intersection")
-bounds = {"left": bounds[0], "bottom": bounds[1], "right": bounds[2], "top": bounds[3]}
-dem_2018 = dem_2018.reproject(dst_bounds=bounds, dst_res=8)
-dem_2012 = dem_2012.reproject(dst_ref=dem_2018)
-ref_dem = ref_dem.reproject(dst_ref=dem_2018)
 
 # #### Load glacier outlines
 
@@ -80,9 +69,9 @@ dh = dem_2018 - dem_2012
 
 vmax=30
 ax = plt.subplot(111)
-rgi_outlines.ds.plot(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
-mera_outlines_2012.ds.plot(ax=ax, facecolor='none', edgecolor='k', zorder=3)
-dh.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cb_title='Elevation change 2012 - 2018 (m)', zorder=1)
+rgi_outlines.show(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
+mera_outlines_2012.show(ax=ax, facecolor='none', edgecolor='k', zorder=3)
+dh.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax.set_title('Mera glacier and surroundings')
 plt.tight_layout()
 
@@ -103,7 +92,7 @@ outlier_mask = (np.abs(dh.data) < 50).filled(False)
 
 # We plot the final mask of pixels used for coregistration
 
-inlier_mask = ~gl_mask & slope_mask & outlier_mask
+inlier_mask = ~gl_mask.data.data & slope_mask & outlier_mask
 plt.imshow(inlier_mask.squeeze())
 
 # Free memory
@@ -117,7 +106,7 @@ del slope, slope_mask, outlier_mask
 # Then we estimate the coregistration needed between our two Pleiades DEMs. \
 # Finally, we apply that coregistration to the 2012 DEM.
 
-coreg = xdem.coreg.NuthKaab() + xdem.coreg.BiasCorr(bias_func=np.median)
+coreg = xdem.coreg.NuthKaab() + xdem.coreg.VerticalShift(vshift_func=np.median)
 coreg.fit(dem_2018, dem_2012, inlier_mask, verbose=True)
 dem_2012_coreg = coreg.apply(dem_2012)
 
@@ -132,13 +121,13 @@ dh_coreg = dem_2018 - dem_2012_coreg
 # +
 plt.figure(figsize=(12, 6))
 ax1 = plt.subplot(121)
-mera_outlines_2012.ds.plot(ax=ax1, facecolor='none', edgecolor='k', zorder=3)
-dh.show(ax=ax1, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cb_title='Elevation change 2012 - 2018 (m)', zorder=1)
+mera_outlines_2012.show(ax=ax1, facecolor='none', edgecolor='k', zorder=3)
+dh.show(ax=ax1, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax1.set_title('Before coregistration')
 
 ax2 = plt.subplot(122)
-mera_outlines_2012.ds.plot(ax=ax2, facecolor='none', edgecolor='k', zorder=3)
-dh_coreg.show(ax=ax2, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cb_title='Elevation change 2012 - 2018 (m)', zorder=1)
+mera_outlines_2012.show(ax=ax2, facecolor='none', edgecolor='k', zorder=3)
+dh_coreg.show(ax=ax2, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax2.set_title('After coregistration')
 
 plt.tight_layout()
@@ -150,7 +139,7 @@ plt.tight_layout()
 # Because `dh.data` is a masked array, we use `compressed()` to output only unmasked values.
 
 # +
-inlier_orig = dh.data[inlier_mask].compressed()
+inlier_orig = dh[inlier_mask]
 nstable_orig, mean_orig = len(inlier_orig), np.mean(inlier_orig)
 med_orig, nmad_orig = np.median(inlier_orig), xdem.spatialstats.nmad(inlier_orig)
 print(f"Number of stable pixels: {nstable_orig}")
@@ -159,7 +148,7 @@ print(f"Before coregistration:\
       \n\tMedian dh: {med_orig:.2f}\
       \n\tNMAD dh: {nmad_orig:.2f}")
 
-inlier_coreg = dh_coreg.data[inlier_mask].compressed()
+inlier_coreg = dh_coreg[inlier_mask]
 nstable_coreg, mean_coreg = len(inlier_coreg), np.mean(inlier_coreg)
 med_coreg, nmad_coreg = np.median(inlier_coreg), xdem.spatialstats.nmad(inlier_coreg)
 print(f"After coregistration:\
@@ -175,7 +164,7 @@ print(f"After coregistration:\
 # The default elevation bins have a height of 50 m, from the DEM minimum to maximum. Here we set the bin height to 25 m with the argument `bins`.
 
 mera_mask = mera_outlines_2012.create_mask(dh_coreg)
-ddem_bins = xdem.volume.hypsometric_binning(dh_coreg.data[mera_mask], ref_dem.data[mera_mask], bins=25, aggregation_function=np.median)
+ddem_bins = xdem.volume.hypsometric_binning(dh_coreg[mera_mask], ref_dem[mera_mask], bins=25, aggregation_function=np.median)
 
 # The output is a panda's DataFrame containing the elevation bin edges, the mean dh ('value') and observations (valid pixels) count.
 
@@ -185,7 +174,7 @@ print(ddem_bins)
 # This is particularly needed for data with gaps, as the values in `ddem_bins['count']` are the number of pixels with observations, not total pixel count.
 # The result is in m$^2$.
 
-bins_area = xdem.volume.calculate_hypsometry_area(ddem_bins, ref_dem.data[mera_mask], pixel_size=dh_coreg.res)
+bins_area = xdem.volume.calculate_hypsometry_area(ddem_bins, ref_dem[mera_mask], pixel_size=dh_coreg.res)
 print(bins_area)
 
 # ### Plot the results
