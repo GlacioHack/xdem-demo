@@ -130,3 +130,6 @@ dmypy.json
 
 # Emacs backup files
 *~
+
+# Data folder
+data/
