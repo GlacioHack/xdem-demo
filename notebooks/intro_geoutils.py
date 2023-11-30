@@ -15,10 +15,20 @@
 
 # # Manipulating raster/vector data with geoutils
 
-# **geoutils** was developed to easily handle raster and vector data\
-# Documentation: https://geoutils.readthedocs.io
+# **geoutils** was developed by glaciologists (R. Hugonnet, E. Mannerfelt, A. Dehecq), to make it easier to handle raster and vector data in Python.\
+# **xDEM** uses all functionnalities of geoutils and add additional tools specific to working with DEMs. \
+# The full documentation can be found at: \
+# https://geoutils.readthedocs.io. \
+# https://xdem.readthedocs.io.
+#
+# This tutorial highlights some basic functionalities of geoutils/xdem:
+# - read, write, reproject and display rasters and vectors
+# - calculate terrain attributes from DEMs (slope, aspect etc.)
+# - calculate difference of DEMs and basic statistics.
+#
+# For more examples, check the examples gallery on both geoutils and xdem's documentation.
 
-# ### Import the necessary modules
+# ## Import the necessary modules
 
 # +
 import matplotlib.pyplot as plt
@@ -28,7 +38,7 @@ import geoutils as gu
 import xdem
 # -
 
-# ### Download the sample data set (if not done already) - Should take a few seconds ###
+# ## Download the sample data set (if not done already) - Should take a few seconds ###
 # The code comes with some data for showcasing the functionality, here two DEMs over Longyearbyen, Norway and glacier outlines over Svalbard. \
 # The files are already on disk, we only nned to find their location.
 
@@ -37,19 +47,28 @@ print(xdem.examples.get_path("longyearbyen_ref_dem"))
 print(xdem.examples.get_path("longyearbyen_tba_dem"))
 print(xdem.examples.get_path("longyearbyen_glacier_outlines"))
 
-# ### Read the two DEMs and glacier outlines for the region ###
+# ### **Side work:** Find these files on your computer and open them in QGIS.
 
-# Raster files (e.g. GeoTiff) can be loaded in one line with `gu.Raster(path_to_file)`. In xdem, the DEM class inherit the same functionalities and more, so here we use `xdem.DEM`.
+# ## Read the two DEMs and glacier outlines for the region ###
 
-dem_2009 = xdem.DEM(xdem.examples.get_path("longyearbyen_ref_dem"))
-dem_1990 = xdem.DEM(xdem.examples.get_path("longyearbyen_tba_dem"))
+# Raster files (e.g. GeoTiff) can be loaded in one line with `gu.Raster(path_to_file)`.
+
+dem_2009 = gu.Raster(xdem.examples.get_path("longyearbyen_ref_dem"))
+dem_1990 = gu.Raster(xdem.examples.get_path("longyearbyen_tba_dem"))
+
+# ### **Side work:** Run the same commands, but copy/paste the file path. Uncomment the lines below (remove the # symbol) and replace ... with the file path.
+
+# +
+# dem_2009 = gu.Raster(...)
+# dem_1990 = gu.Raster(...)
+# -
 
 # Vector files (e.g. ESRI shapefiles) can be loaded in one line with `gu.Vector(path_to_file)`.
 
 outlines_1990 = gu.Vector(xdem.examples.get_path("longyearbyen_glacier_outlines"))
 
-# ### Quickly visualize a raster
-# Since a Raster object comes with all atributes, it can be quickly plot with its georeferencing information.
+# ## Quickly visualize a raster
+# Since a Raster object comes with all atributes, it can be quickly plotted with its georeferencing information.
 
 dem_2009.show()
 
@@ -58,13 +77,13 @@ dem_2009.show()
 dem_2009_hs = xdem.terrain.hillshade(dem_2009)
 dem_2009_hs.show(cmap='gray')
 
-# ### Quickly visualize vector data
+# ## Quickly visualize vector data
 
 outlines_1990.show()
 
-# ### Notes on the Raster and Vector classes
+# ## Notes on the Raster and Vector classes
 #
-# #### The `xdem.DEM` instances inherit from the `geoutils.Raster` class, which is based upon **rasterio**. 
+# ### The `geoutils.Raster` class is based upon **[rasterio](https://rasterio.readthedocs.io)** and inherits most of its metadata. 
 # These objects contain the raster metadata, with the same convention as rasterio. 
 # To georeference an object, one needs to know the coordinate reference system (called `crs` in rasterio/geopandas) and any 3 of these four information:
 # - the raster width and height
@@ -93,52 +112,84 @@ dem_2009.transform
 
 print(dem_2009.info())
 
-# or similarly with `dem_2009.info()`.
-#
 # Along with these metadata, the `xdem.DEM` object contains the data, stored as a numpy masked array in the `self.data` attribute:
 
 dem_2009.data
 
-# #### `gu.Vector` instances are based upon geopandas. 
+# ### `gu.Vector` instances are based upon geopandas. 
 # The class contains several useful methods (`self.create_mask` is showcased below), and the GeoDataFrame can accessed via:
 
 outlines_1990.ds
 
-# ## Rasters operations
+# # Terrain attributes
+#
+# **xDEM** enables calculating many terrain attributes: slope, aspect, hillshade, curbature etc. The full list is available here: https://xdem.readthedocs.io/en/stable/terrain.html
+#
+# Here we will demonstrate a few of them.
 
-# ### Reproject the two DEMs on the same grid
+# ### Slope
+
+slope = xdem.terrain.slope(dem_1990)
+slope.show(cbar_title="Slope (degrees)")
+
+# ### Aspect
+
+aspect = xdem.terrain.aspect(dem_1990)
+aspect.show(cbar_title="Aspect (degrees)", cmap="twilight")
+
+# #### **Side work:** 
+# 1) Plot the terrain rugosity
+# 2) Calculate the maximum slope (using `np.max`)
+
+# +
+# rugosity = xdem.terrain.???(dem_1990)
+# rugosity.show(cbar_title="...", cmap="...")
+
+# +
+# print("Maximum slope is:", np.max(...))
+# -
+
+# # Rasters operations
+
+# ## Reproject the two DEMs on the same grid
 # Here the function returns a warning because the two DEMs are already on the same grid, so nothing is done.
 
 dem_1990 = dem_1990.reproject(dst_ref=dem_2009)
-print(dem_1990)
-print(dem_2009)
+print(dem_1990.info())
+print(dem_2009.info())
 
-# ### Reproject to a given resolution, bounds, or CRS
+# ## Reproject to a given resolution, bounds, or CRS
 
-# Change pixel resolution
+# #### Change pixel resolution
 
 dem_test = dem_1990.reproject(dst_res=60)
 print(dem_test.info())
 
-# Change extent/bounds
+# #### **Question:** What is the new raster height?
+
+# #### Change extent/bounds
 
 dem_test = dem_1990.reproject(dst_bounds={"left":502810, "top":8674000, "right":529430, "bottom": 8654290})
 print(dem_test.info())
 
-# Change CRS
+# #### **Question:** What is the new raster height?
+
+# #### Change Coordinate Reference System (CRS) i.e. projection
 
 dem_test = dem_1990.reproject(dst_crs='epsg:4326')
 print(dem_test.info())
 
-# ### Reproject the outlines in the same coordinate system as DEMs
+# #### **Question:** What is the new pixel resolution? What are the units?
+
+# ## Reproject the outlines in the same coordinate system as DEMs
 
 outlines_proj = outlines_1990.reproject(dst_crs=dem_2009.crs)
 
-# ### Calculate the elevation change
+# # Calculating the difference between two DEMs
 
 ddem = dem_2009 - dem_1990
 
-# ### Plot the elevation change map
+# ## Plot the elevation change map
 # #### Note: 
 # - `ax` is used here to share the same subplot between the raster and outlines (the default is to create a new figure)
 # - ddem is plotted last, to preserve the extent, as glacier outlines cover all of Svalbard.
@@ -155,11 +206,32 @@ plt.tight_layout()
 plt.show()
 # -
 
-# ### Saving the results
+# #### **Side work:** Make changes to the plot: 
+# 1) Plot the glacier outlines in red.
+# 2) Use a different min/max value for colorscale.
+# 3) Use a different colormap (choose among the list [here](https://matplotlib.org/stable/gallery/color/colormap_reference.html)).
+# 4) Change the figure title.
+#
+# (Uncomment the lines below and replace "..." with a different value)
+
+# +
+# fig = plt.figure()
+# ax = plt.subplot(111)
+# outlines_proj.show(ax=ax, facecolor='none', edgecolor='...', zorder=2)
+# ddem.show(ax=ax, cmap='coolwarm', vmin=..., vmax=..., cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
+# ax.set_title('...')
+# plt.tight_layout()
+# plt.show()
+# -
+
+# ## Saving the results
 
 ddem.save("temp_ddem.tif")
 
-# ### Rasterize the glacier outlines on the same grid as ddem
+# # Calculate zonal statistics
+# Here we want to calculate the mean elevation change on and off glaciers.
+
+# ## Rasterize the glacier outlines on the same grid as ddem
 # `glacier_mask` is `True` on glaciers, `False` elsewhere.
 
 glacier_mask = outlines_1990.create_mask(ddem)
@@ -175,5 +247,6 @@ print(np.mean(ddem[glacier_mask]))
 
 print(np.mean(ddem[~glacier_mask]))
 
-# Something is wrong, mean dh over stable terrain should be ~0 => we need to coregister the DEMs. 
-# This is some proper work for our next example !
+# ### Something is wrong, mean dh over stable terrain should be ~0 => we need to coregister the DEMs. This is some proper work for our next example !
+
+
