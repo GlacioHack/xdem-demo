@@ -33,6 +33,7 @@
 # +
 import matplotlib.pyplot as plt
 import numpy as np
+# %matplotlib widget
 
 import geoutils as gu
 import xdem
@@ -70,16 +71,27 @@ outlines_1990 = gu.Vector(xdem.examples.get_path("longyearbyen_glacier_outlines"
 # ## Quickly visualize a raster
 # Since a Raster object comes with all atributes, it can be quickly plotted with its georeferencing information.
 
+plt.figure(figsize=(8, 6))
 dem_2009.show()
+plt.show()
 
 # It is easier to visualize as a hillshade
 
+# +
 dem_2009_hs = xdem.terrain.hillshade(dem_2009)
+
+plt.figure(figsize=(8, 6))
 dem_2009_hs.show(cmap='gray')
+plt.show()
+# -
 
 # ## Quickly visualize vector data
 
-outlines_1990.show()
+plt.figure(figsize=(8, 10))
+ax=plt.subplot(111)
+outlines_1990.show(ax=ax)
+plt.tight_layout()
+plt.show()
 
 # ## Notes on the Raster and Vector classes
 #
@@ -130,12 +142,16 @@ outlines_1990.ds
 # ### Slope
 
 slope = xdem.terrain.slope(dem_1990)
+plt.figure(figsize=(8, 6))
 slope.show(cbar_title="Slope (degrees)")
+plt.show()
 
 # ### Aspect
 
 aspect = xdem.terrain.aspect(dem_1990)
+plt.figure(figsize=(8, 6))
 aspect.show(cbar_title="Aspect (degrees)", cmap="twilight")
+plt.show()
 
 # #### **Side work:** 
 # 1) Plot the terrain rugosity
@@ -198,6 +214,7 @@ ddem = dem_2009 - dem_1990
 # +
 vmax = max(abs(np.max(ddem.data)), abs(np.min(ddem.data)))
 
+plt.figure(figsize=(10, 8))
 ax = plt.subplot(111)
 outlines_proj.show(ax=ax, facecolor='none', edgecolor='k', zorder=2)
 ddem.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
@@ -215,7 +232,7 @@ plt.show()
 # (Uncomment the lines below and replace "..." with a different value)
 
 # +
-# fig = plt.figure()
+# fig = plt.figure(figsize=(10, 8))
 # ax = plt.subplot(111)
 # outlines_proj.show(ax=ax, facecolor='none', edgecolor='...', zorder=2)
 # ddem.show(ax=ax, cmap='coolwarm', vmin=..., vmax=..., cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
