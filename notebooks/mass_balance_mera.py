@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.0
+#       jupytext_version: 1.15.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -24,6 +24,7 @@
 # +
 import matplotlib.pyplot as plt
 import numpy as np
+# %matplotlib widget
 
 import geoutils as gu
 import xdem
@@ -35,23 +36,20 @@ plt.rcParams['image.interpolation'] = 'none'
 
 # ## 1 - Load input data
 #
-# All the data is taken from the Mera mass balance tutorial to be presented by Fanny on Thursday. They are already downloaded in the data folder.\
-# There are 2 Pleiades DEMs from November 2012 and October 2018 that are used to calculate the mass balance. They are at 4 m resolution.\
-# The 3rd DEM is used to calculate the glacier hypsometry, since it is gap-free. It is extracted from the Copernicus Global DEM at 30 m resolution.\
-# There are also manual outlines of Mera glacier for the same dates.
+# All the data is taken from the Mera mass balance geodetic tutorial located in the "04_mb_Mera" folder.
 
 # #### Get input data path ###
 
-fn_dem_2012 = "../data/mb_Mera/2012-11-25_DEM_4m.tif"
-fn_dem_2018 = "../data/mb_Mera/2018-10-28_DEM_4m.tif"
-fn_ref_dem = "../data/mb_Mera/Mera_Co30_DEM_UTM45.tif"
-rgi_shpfile = "../data/mb_Mera/shapefile_RGI/Glacier_inventory_around_Mera.shp"
-mera_shpfile_2012 = "../data/mb_Mera/shapefiles/Mera_outline_2012_realigned.shp"
-mera_shpfile_2018 = "../data/mb_Mera/shapefiles/Mera_outline_2018_realigned.shp"
+fn_dem_2012 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
+fn_dem_2018 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
+fn_ref_dem = "../data/04_mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
+rgi_shpfile = "../data/04_mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
+mera_shpfile_2012 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
+mera_shpfile_2018 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
 
 # #### Load all DEMs at once, cropping to the common extent, and reprojecting onto the 2018 DEM grid
 
-dem_2012, dem_2018, ref_dem = gu.raster.load_multiple_rasters([fn_dem_2012, fn_dem_2018, ref_dem], crop=True, ref_grid=1)
+dem_2012, dem_2018, ref_dem = gu.raster.load_multiple_rasters([fn_dem_2012, fn_dem_2018, fn_ref_dem], crop=True, ref_grid=1)
 
 
 # #### Load glacier outlines
@@ -68,12 +66,14 @@ dh = dem_2018 - dem_2012
 # #### Plot original dh map with glacier contours
 
 vmax=30
+plt.figure(figsize=(10, 10))
 ax = plt.subplot(111)
 rgi_outlines.show(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
 mera_outlines_2012.show(ax=ax, facecolor='none', edgecolor='k', zorder=3)
 dh.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax.set_title('Mera glacier and surroundings')
 plt.tight_layout()
+plt.show()
 
 # There are non-zeros elevation changes outside of glaciers => These DEMs need to be coregistered.
 
@@ -93,9 +93,11 @@ outlier_mask = (np.abs(dh.data) < 50).filled(False)
 # We plot the final mask of pixels used for coregistration
 
 inlier_mask = ~gl_mask.data.data & slope_mask & outlier_mask
+plt.figure(figsize=(8, 8))
 plt.imshow(inlier_mask.squeeze())
+plt.show()
 
-# Free memory
+# Free memory (needed when running on binder)
 
 del slope, slope_mask, outlier_mask
 
@@ -119,7 +121,7 @@ print(coreg.pipeline[0]._meta)
 dh_coreg = dem_2018 - dem_2012_coreg
 
 # +
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(10, 6))
 ax1 = plt.subplot(121)
 mera_outlines_2012.show(ax=ax1, facecolor='none', edgecolor='k', zorder=3)
 dh.show(ax=ax1, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
@@ -131,6 +133,7 @@ dh_coreg.show(ax=ax2, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevatio
 ax2.set_title('After coregistration')
 
 plt.tight_layout()
+plt.show()
 # -
 
 # We see that elevation changes outside glaciers are close to zero (yellow color).
@@ -200,6 +203,7 @@ plt.plot(ddem_bins["value"], ddem_bins.index.mid, "k")
 plt.xlabel("Elevation change (m/a)")
 
 plt.tight_layout()
+plt.show()
 # -
 
 # ### Calculate total volume and mass change
