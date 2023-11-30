@@ -153,7 +153,7 @@ ax.set_title('Thinning glaciers near Mera peak')
 plt.tight_layout()
 plt.show()
 
-# ## Save the results in a file named "Pleiades_2012_2018_dh.tif"
+# ## Save the results in a file named "tmp_Pleiades_2012_2018_dh.tif"
 
 ddem.save("../data/tmp_Pleiades_2012_2018_dh.tif")
 

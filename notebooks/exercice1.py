@@ -139,7 +139,7 @@ ax = plt.subplot(111)
 plt.tight_layout()
 plt.show()
 
-# ## Save the results in a file named "Pleiades_2012_2018_dh.tif"
+# ## Save the results in a file named "tmp_Pleiades_2012_2018_dh.tif"
 
 # +
 # to be filled in
