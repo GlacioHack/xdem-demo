@@ -13,20 +13,22 @@
 #     name: python3
 # ---
 
-# # Manipulating raster/vector data with geoutils
+# # Manipulating raster/vector data in Python
 
-# **geoutils** was developed by glaciologists (R. Hugonnet, E. Mannerfelt, A. Dehecq), to make it easier to handle raster and vector data in Python.\
-# **xDEM** uses all functionnalities of geoutils and add additional tools specific to working with DEMs. \
-# The full documentation can be found at: \
-# https://geoutils.readthedocs.io. \
-# https://xdem.readthedocs.io.
-#
-# This tutorial highlights some basic functionalities of geoutils/xdem:
+# In this tutorial, we will learn some basic operations on raster/vector data in Python such as:
 # - read, write, reproject and display rasters and vectors
 # - calculate terrain attributes from DEMs (slope, aspect etc.)
 # - calculate difference of DEMs and basic statistics.
 #
-# For more examples, check the examples gallery on both geoutils and xdem's documentation.
+# We will make use of the **geoutils** and **xdem** libraries. They are not "standard" Python libraries but were developed by glaciologists (R. Hugonnet, E. Mannerfelt, A. Dehecq), to make it easier to work with such data in Python. They are based upon the more known **rasterio/GDAL** and **geopandas** libraries.
+# - **geoutils** provides functionalities for working with raster/vector data.
+# - **xDEM** uses all functionnalities of geoutils and add additional tools specific to working with DEMs.
+#
+# The full documentation can be found at: \
+# https://geoutils.readthedocs.io. \
+# https://xdem.readthedocs.io.
+#
+# For more features, check the examples gallery on both geoutils and xdem's documentation.
 
 # ## Import the necessary modules
 
@@ -48,7 +50,9 @@ print(xdem.examples.get_path("longyearbyen_ref_dem"))
 print(xdem.examples.get_path("longyearbyen_tba_dem"))
 print(xdem.examples.get_path("longyearbyen_glacier_outlines"))
 
-# ### **Side work:** Find these files on your computer and open them in QGIS.
+# ### <span style='color:red '> **TO DO:** </span> Find these files on your computer and open them in QGIS.
+#
+#
 
 # ## Read the two DEMs and glacier outlines for the region ###
 
@@ -57,7 +61,7 @@ print(xdem.examples.get_path("longyearbyen_glacier_outlines"))
 dem_2009 = gu.Raster(xdem.examples.get_path("longyearbyen_ref_dem"))
 dem_1990 = gu.Raster(xdem.examples.get_path("longyearbyen_tba_dem"))
 
-# ### **Side work:** Run the same commands, but copy/paste the file path. Uncomment the lines below (remove the # symbol) and replace ... with the file path.
+# ### <span style='color:red '> **TO DO:** </span> Run the same commands, but copy/paste the file path. Uncomment the lines below (remove the # symbol) and replace ... with the file path.
 
 # +
 # dem_2009 = gu.Raster(...)
@@ -71,7 +75,7 @@ outlines_1990 = gu.Vector(xdem.examples.get_path("longyearbyen_glacier_outlines"
 # ## Quickly visualize a raster
 # Since a Raster object comes with all atributes, it can be quickly plotted with its georeferencing information.
 
-plt.figure(figsize=(8, 6))
+fig, ax = plt.subplots(figsize=(8, 6))
 dem_2009.show()
 plt.show()
 
@@ -80,15 +84,14 @@ plt.show()
 # +
 dem_2009_hs = xdem.terrain.hillshade(dem_2009)
 
-plt.figure(figsize=(8, 6))
+fig, ax = plt.subplots(figsize=(8, 6))
 dem_2009_hs.show(cmap='gray')
 plt.show()
 # -
 
 # ## Quickly visualize vector data
 
-plt.figure(figsize=(8, 10))
-ax=plt.subplot(111)
+fig, ax = plt.subplots(figsize=(8, 10))
 outlines_1990.show(ax=ax)
 plt.tight_layout()
 plt.show()
@@ -105,8 +108,12 @@ plt.show()
 # These variables are inter-dependent, e.g. if one knows the raster's extent and width and height, the pixel resolution is fixed.
 # All these variables are stored in the `xdem.DEM` instance with the following attributes:
 
-print(f"As PROJ4 string: {dem_2009.crs.to_proj4()}\n")
-print(f"As WKT string: \n{dem_2009.crs.to_wkt()}")
+# Coordinate reference system (CRS)
+
+print(f"EPSG code: {dem_2009.crs.to_epsg()}\n")
+print(f"Printed as WKT string: \n{dem_2009.crs.to_wkt()}")
+
+# Raster width, height, resolution and bounds
 
 dem_2009.width
 
@@ -129,7 +136,7 @@ print(dem_2009.info())
 dem_2009.data
 
 # ### `gu.Vector` instances are based upon geopandas. 
-# The class contains several useful methods (`self.create_mask` is showcased below), and the GeoDataFrame can accessed via:
+# The class contains several useful methods (`self.create_mask` is showcased below), and the underlying GeoPandas' Data Frame can accessed via:
 
 outlines_1990.ds
 
@@ -142,20 +149,21 @@ outlines_1990.ds
 # ### Slope
 
 slope = xdem.terrain.slope(dem_1990)
-plt.figure(figsize=(8, 6))
+fig, ax = plt.subplots(figsize=(8, 6))
 slope.show(cbar_title="Slope (degrees)")
 plt.show()
 
 # ### Aspect
 
 aspect = xdem.terrain.aspect(dem_1990)
-plt.figure(figsize=(8, 6))
+fig, ax = plt.subplots(figsize=(8, 6))
 aspect.show(cbar_title="Aspect (degrees)", cmap="twilight")
 plt.show()
 
-# #### **Side work:** 
+# #### <span style='color:red '> **TO DO:** </span> 
 # 1) Plot the terrain rugosity
-# 2) Calculate the maximum slope (using `np.max`)
+# 2) Calculate the maximum slope (using `np.max`)  
+# Uncomment (remove the #) below.
 
 # +
 # rugosity = xdem.terrain.???(dem_1990)
@@ -165,12 +173,15 @@ plt.show()
 # print("Maximum slope is:", np.max(...))
 # -
 
-# # Rasters operations
+# # Raster operations
 
 # ## Reproject the two DEMs on the same grid
-# Here the function returns a warning because the two DEMs are already on the same grid, so nothing is done.
+# NB: Here the function returns a warning because the two DEMs are already on the same grid, so nothing is actually done.
 
 dem_1990 = dem_1990.reproject(dst_ref=dem_2009)
+
+# Check that both DEMs indeed have the same grid
+
 print(dem_1990.info())
 print(dem_2009.info())
 
@@ -214,7 +225,7 @@ ddem = dem_2009 - dem_1990
 # +
 vmax = max(abs(np.max(ddem.data)), abs(np.min(ddem.data)))
 
-plt.figure(figsize=(10, 8))
+fig, ax = plt.subplots(figsize=(10, 8))
 ax = plt.subplot(111)
 outlines_proj.show(ax=ax, facecolor='none', edgecolor='k', zorder=2)
 ddem.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
@@ -223,7 +234,7 @@ plt.tight_layout()
 plt.show()
 # -
 
-# #### **Side work:** Make changes to the plot: 
+# #### <span style='color:red '> **TO DO:** </span> Make changes to the plot: 
 # 1) Plot the glacier outlines in red.
 # 2) Use a different min/max value for colorscale.
 # 3) Use a different colormap (choose among the list [here](https://matplotlib.org/stable/gallery/color/colormap_reference.html)).
@@ -232,7 +243,7 @@ plt.show()
 # (Uncomment the lines below and replace "..." with a different value)
 
 # +
-# fig = plt.figure(figsize=(10, 8))
+# fig, ax = plt.subplots(figsize=(10, 8))
 # ax = plt.subplot(111)
 # outlines_proj.show(ax=ax, facecolor='none', edgecolor='...', zorder=2)
 # ddem.show(ax=ax, cmap='coolwarm', vmin=..., vmax=..., cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
@@ -264,6 +275,8 @@ print(np.mean(ddem[glacier_mask]))
 
 print(np.mean(ddem[~glacier_mask]))
 
-# ### Something is wrong, mean dh over stable terrain should be ~0 => we need to coregister the DEMs. This is some proper work for our next example !
+
+
+# ### Something is incorrect... mean dh over stable terrain should be ~0 => we need to coregister the DEMs. This is some proper work for our next example !
 
 
