@@ -6,16 +6,16 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.0
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
 
-# # Calculating a glacier geodetic mass balance with xdem
+# # DEM coregistration and glacier geodetic mass balance with xdem
 #
-# ### This notebook showcases how to use xdem to calculate the glacier geodetic mass balance of Mera glacier, Nepal, using two DEMs derived from Pleiades stereo images.
+# ### This notebook showcases how to use xdem to coregister two DEMs and calculate the glacier geodetic mass balance of Mera glacier, Nepal, using two DEMs derived from Pleiades stereo images.
 #
 #
 
@@ -39,6 +39,8 @@ plt.rcParams['image.interpolation'] = 'none'
 # All the data is taken from the Mera mass balance geodetic tutorial located in the "04_mb_Mera" folder.
 
 # #### Get input data path ###
+# ### <span style='color:red '> **TO DO:** </span> If needed, update the path to the files below.
+#
 
 fn_dem_2012 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
 fn_dem_2018 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
@@ -101,8 +103,8 @@ plt.show()
 
 del slope, slope_mask, outlier_mask
 
-# #### Run coregistration
-# We use the Nuth & Kaab (2011) algorithm to estimate a horizontal offset, then we remove a possible vertical bias by removing the median dh value in stable terrain.
+# ### Run coregistration
+# #### We use the Nuth & Kaab (2011) algorithm to estimate a horizontal offset, then we remove a possible vertical bias by removing the median dh value in stable terrain.
 
 # First, we need to define the coregistration function. \
 # Then we estimate the coregistration needed between our two Pleiades DEMs. \
@@ -116,7 +118,12 @@ dem_2012_coreg = coreg.apply(dem_2012)
 
 print(coreg.pipeline[0]._meta)
 
-# #### Calculate new elevation change and plot
+# ### <span style='color:red '> **Question:** </span> How many iterations of the Nuth & Kaab algorithm were run?
+#
+
+# #### Answer: ...
+
+# ### Calculate new elevation change and plot
 
 dh_coreg = dem_2018 - dem_2012_coreg
 
@@ -136,9 +143,9 @@ plt.tight_layout()
 plt.show()
 # -
 
-# We see that elevation changes outside glaciers are close to zero (yellow color).
+# #### We see that elevation changes outside glaciers are close to zero (yellow color).
 
-# #### Calculate statistics of before/after coregistration
+# ### Calculate statistics of before/after coregistration
 # Because `dh.data` is a masked array, we use `compressed()` to output only unmasked values.
 
 # +
@@ -163,6 +170,7 @@ print(f"After coregistration:\
 # ## 3 - Geodetic mass balance of Mera glacier
 #
 # ### Calculate mean dh over glaciers, per elevation bins
+# We use the function `xdem.volume.hypsometric_binning` (see brief documentation [here](https://xdem.readthedocs.io/en/stable/gen_modules/xdem.volume.html)) to calculate the mean (or median) value of dh within elevation bands. \
 # The calculation requires a (raster) mask of the glacier, the dh values, and a reference DEM used to get the elevation of the pixels. All must be on the same grid. \
 # The default elevation bins have a height of 50 m, from the DEM minimum to maximum. Here we set the bin height to 25 m with the argument `bins`.
 
@@ -179,6 +187,12 @@ print(ddem_bins)
 
 bins_area = xdem.volume.calculate_hypsometry_area(ddem_bins, ref_dem[mera_mask], pixel_size=dh_coreg.res)
 print(bins_area)
+
+# ### <span style='color:red '> **Questions:** </span> 
+# - what is the median dh at 5400 m ?
+# - at which elevation is the highest thinning?
+# - what is the area of glaciers in the elevation band at 6000 m?
+#
 
 # ### Plot the results
 # 1. Plot glacier area vs elevation
@@ -199,12 +213,14 @@ plt.xlabel("Glacier area per elevation bins (km\u00b2)")
 plt.ylabel("Elevation (m)")
 
 plt.twiny()
-plt.plot(ddem_bins["value"], ddem_bins.index.mid, "k")
+plt.plot(ddem_bins["value"].values, ddem_bins.index.mid.values, "k")
 plt.xlabel("Elevation change (m/a)")
 
 plt.tight_layout()
 plt.show()
 # -
+
+# The glacier area is plotted with blue bars (x axis at the bottom) and elevation change in dark line (x axis at the top) versus elevation (y axis).
 
 # ### Calculate total volume and mass change
 # - volume change is in m$^3$
