@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.0
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -167,7 +167,9 @@ plt.show()
 
 # +
 # rugosity = xdem.terrain.???(dem_1990)
+# fig, ax = plt.subplots(figsize=(8, 6))
 # rugosity.show(cbar_title="...", cmap="...")
+# plt.show()
 
 # +
 # print("Maximum slope is:", np.max(...))
@@ -221,18 +223,19 @@ ddem = dem_2009 - dem_1990
 # - `ax` is used here to share the same subplot between the raster and outlines (the default is to create a new figure)
 # - ddem is plotted last, to preserve the extent, as glacier outlines cover all of Svalbard.
 # - zorder is used to plot in the right sequence (outlines on top)
+# - we save the figure to a png file with command `plt.savefig`. You can use a different dpi setting to change the image resolution/size.
 
-# +
-vmax = max(abs(np.max(ddem.data)), abs(np.min(ddem.data)))
+# Here we automatically calculate the min and max value for the color scale (vmin, vmax). We take the maximum absolute elevation change value. Since the colorbar is divergent (red for negative values, blue for positive) it only makes sense if centered on 0, so we set vmin=-vmax.
+
+vmax = np.max(np.abs(ddem.data))
 
 fig, ax = plt.subplots(figsize=(10, 8))
-ax = plt.subplot(111)
 outlines_proj.show(ax=ax, facecolor='none', edgecolor='k', zorder=2)
 ddem.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
 ax.set_title('Thinning glaciers near Longyearbyen')
 plt.tight_layout()
+plt.savefig("ddem_map.png")
 plt.show()
-# -
 
 # #### <span style='color:red '> **TO DO:** </span> Make changes to the plot: 
 # 1) Plot the glacier outlines in red.
@@ -244,7 +247,6 @@ plt.show()
 
 # +
 # fig, ax = plt.subplots(figsize=(10, 8))
-# ax = plt.subplot(111)
 # outlines_proj.show(ax=ax, facecolor='none', edgecolor='...', zorder=2)
 # ddem.show(ax=ax, cmap='coolwarm', vmin=..., vmax=..., cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
 # ax.set_title('...')
@@ -252,7 +254,9 @@ plt.show()
 # plt.show()
 # -
 
-# ## Saving the results
+# ## Saving the elevation change to GTiff
+
+# If you want to export the results to a GTiff for archiving or analyzing in another software (e.g. QGIS), here's how to do it.
 
 ddem.save("temp_ddem.tif")
 
