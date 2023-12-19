@@ -251,6 +251,6 @@ print(f"Specific mass balance: {dh_mwe:.1f} m w.e.")
 # How sensitive are your results to these different parameters?\
 # Can your reproduce the results of Wagnon et al. (2021), JoG. Check the methods to see what bin size and filtering method they used. Your results should match their +/- 0.03 m w.e..
 # 4. Try calculating the mass balance for another glacier.\
-# Hint 1: To select one glacier from the RGI outlines, use `rgi_outlines.ds[rgi_outlines.ds.RGIId == "YOUR_RGI_ID"]` where YOUR_RGI_ID is replaced by the ID of your chosen glacier, within the Pleiades DEM bounds.
+# Hint 1: To select one glacier from the RGI outlines, use `rgi_outlines.ds[rgi_outlines.ds["rgi_id"] == "YOUR_RGI_ID"]` where YOUR_RGI_ID is replaced by the ID of your chosen glacier, within the Pleiades DEM bounds.
 
 
