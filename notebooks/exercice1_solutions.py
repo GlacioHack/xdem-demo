@@ -163,7 +163,7 @@ ddem.save("../data/tmp_Pleiades_2012_2018_dh.tif")
 # ## Rasterize the RGI glacier outlines on the same grid as ddem
 
 glaciers_mask = outlines_rgi.create_mask(ddem)
-plt.figure(figsize=(8,8))
+fig, ax = plt.subplots(figsize=(8,8))
 glaciers_mask.show(add_cbar=False)
 plt.show()
 
