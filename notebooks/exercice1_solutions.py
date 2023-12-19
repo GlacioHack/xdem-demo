@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.0
+#       jupytext_version: 1.16.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -105,14 +105,14 @@ plt.show()
 # #### Calculate and plot slope and aspect for the 2018 DEM
 
 slope = xdem.terrain.slope(dem_2018)
-plt.figure(figsize=(10,10))
+fig, ax = plt.subplots(figsize=(10,10))
 slope.show(cbar_title="Slope (degrees)")
 plt.show()
 
 # #### Calculate and plot aspect for the 2018 DEM
 
 aspect = xdem.terrain.aspect(dem_2018)
-plt.figure(figsize=(10,10))
+fig, ax = plt.subplots(figsize=(10,10))
 aspect.show(cbar_title="Aspect (degrees)", cmap="twilight")
 plt.show()
 

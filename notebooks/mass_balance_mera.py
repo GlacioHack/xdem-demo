@@ -36,26 +36,25 @@ plt.rcParams['image.interpolation'] = 'none'
 
 # ## 1 - Load input data
 #
-# All the data is taken from the Mera mass balance geodetic tutorial located in the "04_mb_Mera" folder.
+# All the data is taken from the Mera mass balance geodetic tutorial located in the "mb_Mera" folder.
 
 # #### Get input data path ###
 # ### <span style='color:red '> **TO DO:** </span> If needed, update the path to the files below.
 #
 
+# #### Load all DEMs at once, cropping to the common extent, and reprojecting onto the 2018 DEM grid
+
 fn_dem_2012 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
 fn_dem_2018 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
 fn_ref_dem = "../data/04_mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
-rgi_shpfile = "../data/04_mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
-mera_shpfile_2012 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
-mera_shpfile_2018 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
-
-# #### Load all DEMs at once, cropping to the common extent, and reprojecting onto the 2018 DEM grid
-
 dem_2012, dem_2018, ref_dem = gu.raster.load_multiple_rasters([fn_dem_2012, fn_dem_2018, fn_ref_dem], crop=True, ref_grid=1)
 
 
 # #### Load glacier outlines
 
+rgi_shpfile = "../data/04_mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
+mera_shpfile_2012 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
+mera_shpfile_2018 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
 rgi_outlines = gu.Vector(rgi_shpfile)
 mera_outlines_2012 = gu.Vector(mera_shpfile_2012)
 mera_outlines_2018 = gu.Vector(mera_shpfile_2018)
@@ -94,7 +93,7 @@ outlier_mask = (np.abs(dh.data) < 50).filled(False)
 
 # We plot the final mask of pixels used for coregistration
 
-inlier_mask = ~gl_mask.data.data & slope_mask & outlier_mask
+inlier_mask = ~gl_mask.data.filled(False) & slope_mask & outlier_mask
 plt.figure(figsize=(8, 8))
 plt.imshow(inlier_mask.squeeze())
 plt.show()
