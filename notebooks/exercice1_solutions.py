@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.0
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -17,7 +17,7 @@
 
 # In this notebook, we apply the tools learnt in the `intro_geoutils` notebook to a different data set.
 #
-# We use the data from the Mera geodetic mass balance tutorials to be presented in the following days. They are available in the data folder "04_mb_Mera".\
+# We use the data from the Mera geodetic mass balance tutorials to be presented in the following days. They are available in the data folder "mb_Mera".\
 # There are 2 Pleiades DEMs from November 2012 and October 2018.\
 # There are manual outlines of Mera glacier for the same dates and a sample of RGI outlines for the study area.
 
@@ -39,16 +39,16 @@ import xdem
 #
 # Files are named "Mera_Pleiades_2012-11-25_DEM_4m.tif" and "Mera_Pleiades_2018-10-28_DEM_4m.tif".
 
-dem_2012 = gu.Raster("../data/04_mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif")
-dem_2018 = gu.Raster("../data/04_mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif")
+dem_2012 = gu.Raster("../data/mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif")
+dem_2018 = gu.Raster("../data/mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif")
 
 # ### Load the glacier outlines: Mera outlines from 2012 and 2018, RGI outlines
 #
 # Files are named: "Mera_outline_2012_realigned.shp", "Mera_outline_2018_realigned.shp" and "Glacier_inventory_around_Mera.shp".
 
-outlines_2012 = gu.Vector("../data/04_mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp")
-outlines_2018 = gu.Vector("../data/04_mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp")
-outlines_rgi = gu.Vector("../data/04_mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp")
+outlines_2012 = gu.Vector("../data/mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp")
+outlines_2018 = gu.Vector("../data/mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp")
+outlines_rgi = gu.Vector("../data/mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp")
 
 # #### **Questions:** 
 # - What is the spatial resolution of the DEMs? Is it the same for both?
@@ -57,9 +57,9 @@ outlines_rgi = gu.Vector("../data/04_mb_Mera/RGI_shapefiles/Glacier_inventory_ar
 #
 # Use the code cell below to type your commands and find the answer to the questions.
 
-print(dem_2012.info())
+dem_2012.info()
 
-print(dem_2018.info())
+dem_2018.info()
 
 print(dem_2012.crs.to_wkt())
 
@@ -85,13 +85,13 @@ hillshade_2018 = xdem.terrain.hillshade(dem_2018)
 fig = plt.figure(figsize=(10,6))
 
 ax1 = plt.subplot(121)
-hillshade_2012.show(cmap='gray', add_cbar=False)
-outlines_2012.show(ax=ax1, facecolor='none', edgecolor='k')
+hillshade_2012.plot(cmap='gray', add_cbar=False)
+outlines_2012.plot(ax=ax1, facecolor='none', edgecolor='k')
 ax1.set_title('Mera glacier and 2012 DEM')
 
 ax2 = plt.subplot(122)
-hillshade_2018.show(cmap='gray', add_cbar=False)
-outlines_2018.show(ax=ax2, facecolor='none', edgecolor='k')
+hillshade_2018.plot(cmap='gray', add_cbar=False)
+outlines_2018.plot(ax=ax2, facecolor='none', edgecolor='k')
 ax2.set_title('Mera glacier and 2012 DEM')
 
 plt.tight_layout()
@@ -105,15 +105,15 @@ plt.show()
 # #### Calculate and plot slope and aspect for the 2018 DEM
 
 slope = xdem.terrain.slope(dem_2018)
-fig, ax = plt.subplots(figsize=(10,10))
-slope.show(cbar_title="Slope (degrees)")
+plt.figure(figsize=(10,10))
+slope.plot(cbar_title="Slope (degrees)")
 plt.show()
 
 # #### Calculate and plot aspect for the 2018 DEM
 
 aspect = xdem.terrain.aspect(dem_2018)
-fig, ax = plt.subplots(figsize=(10,10))
-aspect.show(cbar_title="Aspect (degrees)", cmap="twilight")
+plt.figure(figsize=(10,10))
+aspect.plot(cbar_title="Aspect (degrees)", cmap="twilight")
 plt.show()
 
 # # Calculating the difference between the two DEMs
@@ -127,9 +127,9 @@ ddem = dem_2018 - dem_2012
 # ### Reproject the two DEMs on the same grid
 # Check afterwards that both DEM have same shape and georeferences.
 
-dem_2012_proj = dem_2012.reproject(dst_ref=dem_2018)
-print(dem_2012_proj.info())
-print(dem_2018.info())
+dem_2012_proj = dem_2012.reproject(ref=dem_2018)
+dem_2012_proj.info()
+dem_2018.info()
 
 # ### Now calculate the elevation change again
 
@@ -145,10 +145,10 @@ ddem = dem_2018 - dem_2012_proj
 
 plt.figure(figsize=(10, 10))
 ax = plt.subplot(111)
-outlines_2012.show(ax=ax, facecolor='none', edgecolor='b', zorder=2)
-outlines_2018.show(ax=ax, facecolor='none', edgecolor='r', zorder=3)
-outlines_rgi.show(ax=ax, facecolor='none', edgecolor='k', zorder=4)
-ddem.show(ax=ax, cmap='RdYlBu', vmin=-50, vmax=50, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
+outlines_2012.plot(ax=ax, facecolor='none', edgecolor='b', zorder=2)
+outlines_2018.plot(ax=ax, facecolor='none', edgecolor='r', zorder=3)
+outlines_rgi.plot(ax=ax, facecolor='none', edgecolor='k', zorder=4)
+ddem.plot(ax=ax, cmap='RdYlBu', vmin=-50, vmax=50, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax.set_title('Thinning glaciers near Mera peak')
 plt.tight_layout()
 plt.show()
@@ -163,8 +163,8 @@ ddem.save("../data/tmp_Pleiades_2012_2018_dh.tif")
 # ## Rasterize the RGI glacier outlines on the same grid as ddem
 
 glaciers_mask = outlines_rgi.create_mask(ddem)
-fig, ax = plt.subplots(figsize=(8,8))
-glaciers_mask.show(add_cbar=False)
+plt.figure(figsize=(8,8))
+glaciers_mask.plot(add_cbar=False)
 plt.show()
 
 # ### Calculate mean dh over glaciers or stable terrain

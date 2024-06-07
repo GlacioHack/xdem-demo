@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.0
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -57,7 +57,7 @@ outlines_rgi = # use the command to load a Vector to open the RGI outlines
 #
 # Use the code cell below to type your commands and find the answer to the questions.
 
-print(dem_2012.info())
+dem_2012.info()
 
 # +
 # type in other commands here to find the answer to the questions
@@ -118,8 +118,8 @@ ddem = # to be filled in
 # Check afterwards that both DEM have same shape and georeferences.
 
 dem_2012_proj = # to be filled in
-print(dem_2012_proj.info())
-print(dem_2018.info())
+dem_2012_proj.info()
+dem_2018.info()
 
 # ### Now calculate the elevation change again
 

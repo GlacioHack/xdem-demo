@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.0
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -76,7 +76,7 @@ outlines_1990 = gu.Vector(xdem.examples.get_path("longyearbyen_glacier_outlines"
 # Since a Raster object comes with all atributes, it can be quickly plotted with its georeferencing information.
 
 fig, ax = plt.subplots(figsize=(8, 6))
-dem_2009.show()
+dem_2009.plot()
 plt.show()
 
 # It is easier to visualize as a hillshade
@@ -85,14 +85,14 @@ plt.show()
 dem_2009_hs = xdem.terrain.hillshade(dem_2009)
 
 fig, ax = plt.subplots(figsize=(8, 6))
-dem_2009_hs.show(cmap='gray')
+dem_2009_hs.plot(cmap='gray')
 plt.show()
 # -
 
 # ## Quickly visualize vector data
 
 fig, ax = plt.subplots(figsize=(8, 10))
-outlines_1990.show(ax=ax)
+outlines_1990.plot(ax=ax)
 plt.tight_layout()
 plt.show()
 
@@ -129,7 +129,7 @@ dem_2009.transform
 
 # These information, and more, can all be obtained **at once** with the command
 
-print(dem_2009.info())
+dem_2009.info()
 
 # Along with these metadata, the `xdem.DEM` object contains the data, stored as a numpy masked array in the `self.data` attribute:
 
@@ -150,14 +150,14 @@ outlines_1990.ds
 
 slope = xdem.terrain.slope(dem_1990)
 fig, ax = plt.subplots(figsize=(8, 6))
-slope.show(cbar_title="Slope (degrees)")
+slope.plot(cbar_title="Slope (degrees)")
 plt.show()
 
 # ### Aspect
 
 aspect = xdem.terrain.aspect(dem_1990)
 fig, ax = plt.subplots(figsize=(8, 6))
-aspect.show(cbar_title="Aspect (degrees)", cmap="twilight")
+aspect.plot(cbar_title="Aspect (degrees)", cmap="twilight")
 plt.show()
 
 # #### <span style='color:red '> **TO DO:** </span> 
@@ -168,7 +168,7 @@ plt.show()
 # +
 # rugosity = xdem.terrain.???(dem_1990)
 # fig, ax = plt.subplots(figsize=(8, 6))
-# rugosity.show(cbar_title="...", cmap="...")
+# rugosity.plot(cbar_title="...", cmap="...")
 # plt.show()
 
 # +
@@ -180,39 +180,39 @@ plt.show()
 # ## Reproject the two DEMs on the same grid
 # NB: Here the function returns a warning because the two DEMs are already on the same grid, so nothing is actually done.
 
-dem_1990 = dem_1990.reproject(dst_ref=dem_2009)
+dem_1990 = dem_1990.reproject(ref=dem_2009)
 
 # Check that both DEMs indeed have the same grid
 
-print(dem_1990.info())
-print(dem_2009.info())
+dem_1990.info()
+dem_2009.info()
 
 # ## Reproject to a given resolution, bounds, or CRS
 
 # #### Change pixel resolution
 
-dem_test = dem_1990.reproject(dst_res=60)
-print(dem_test.info())
+dem_test = dem_1990.reproject(res=60)
+dem_test.info()
 
 # #### **Question:** What is the new raster height?
 
 # #### Change extent/bounds
 
-dem_test = dem_1990.reproject(dst_bounds={"left":502810, "top":8674000, "right":529430, "bottom": 8654290})
-print(dem_test.info())
+dem_test = dem_1990.reproject(bounds={"left":502810, "top":8674000, "right":529430, "bottom": 8654290})
+dem_test.info()
 
 # #### **Question:** What is the new raster height?
 
 # #### Change Coordinate Reference System (CRS) i.e. projection
 
-dem_test = dem_1990.reproject(dst_crs='epsg:4326')
-print(dem_test.info())
+dem_test = dem_1990.reproject(crs='epsg:4326')
+dem_test.info()
 
 # #### **Question:** What is the new pixel resolution? What are the units?
 
 # ## Reproject the outlines in the same coordinate system as DEMs
 
-outlines_proj = outlines_1990.reproject(dst_crs=dem_2009.crs)
+outlines_proj = outlines_1990.reproject(crs=dem_2009.crs)
 
 # # Calculating the difference between two DEMs
 
@@ -230,8 +230,8 @@ ddem = dem_2009 - dem_1990
 vmax = np.max(np.abs(ddem.data))
 
 fig, ax = plt.subplots(figsize=(10, 8))
-outlines_proj.show(ax=ax, facecolor='none', edgecolor='k', zorder=2)
-ddem.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
+outlines_proj.plot(ax=ax, facecolor='none', edgecolor='k', zorder=2)
+ddem.plot(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
 ax.set_title('Thinning glaciers near Longyearbyen')
 plt.tight_layout()
 plt.savefig("ddem_map.png")
@@ -247,8 +247,8 @@ plt.show()
 
 # +
 # fig, ax = plt.subplots(figsize=(10, 8))
-# outlines_proj.show(ax=ax, facecolor='none', edgecolor='...', zorder=2)
-# ddem.show(ax=ax, cmap='coolwarm', vmin=..., vmax=..., cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
+# outlines_proj.plot(ax=ax, facecolor='none', edgecolor='...', zorder=2)
+# ddem.plot(ax=ax, cmap='coolwarm', vmin=..., vmax=..., cbar_title='Elevation change 2009 - 1990 (m)', zorder=1)
 # ax.set_title('...')
 # plt.tight_layout()
 # plt.show()
@@ -267,7 +267,7 @@ ddem.save("temp_ddem.tif")
 # `glacier_mask` is `True` on glaciers, `False` elsewhere.
 
 glacier_mask = outlines_1990.create_mask(ddem)
-glacier_mask.show(add_cbar=False)
+glacier_mask.plot(add_cbar=False)
 
 # ### Calculate mean dh over glaciers or stable terrain
 
