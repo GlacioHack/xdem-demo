@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.0
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -44,17 +44,17 @@ plt.rcParams['image.interpolation'] = 'none'
 
 # #### Load all DEMs at once, cropping to the common extent, and reprojecting onto the 2018 DEM grid
 
-fn_dem_2012 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
-fn_dem_2018 = "../data/04_mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
-fn_ref_dem = "../data/04_mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
+fn_dem_2012 = "../data/mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
+fn_dem_2018 = "../data/mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
+fn_ref_dem = "../data/mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
 dem_2012, dem_2018, ref_dem = gu.raster.load_multiple_rasters([fn_dem_2012, fn_dem_2018, fn_ref_dem], crop=True, ref_grid=1)
 
 
 # #### Load glacier outlines
 
-rgi_shpfile = "../data/04_mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
-mera_shpfile_2012 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
-mera_shpfile_2018 = "../data/04_mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
+rgi_shpfile = "../data/mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
+mera_shpfile_2012 = "../data/mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
+mera_shpfile_2018 = "../data/mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
 rgi_outlines = gu.Vector(rgi_shpfile)
 mera_outlines_2012 = gu.Vector(mera_shpfile_2012)
 mera_outlines_2018 = gu.Vector(mera_shpfile_2018)
@@ -69,9 +69,9 @@ dh = dem_2018 - dem_2012
 vmax=30
 plt.figure(figsize=(10, 10))
 ax = plt.subplot(111)
-rgi_outlines.show(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
-mera_outlines_2012.show(ax=ax, facecolor='none', edgecolor='k', zorder=3)
-dh.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
+rgi_outlines.plot(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
+mera_outlines_2012.plot(ax=ax, facecolor='none', edgecolor='k', zorder=3)
+dh.plot(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax.set_title('Mera glacier and surroundings')
 plt.tight_layout()
 plt.show()
@@ -129,13 +129,13 @@ dh_coreg = dem_2018 - dem_2012_coreg
 # +
 plt.figure(figsize=(10, 6))
 ax1 = plt.subplot(121)
-mera_outlines_2012.show(ax=ax1, facecolor='none', edgecolor='k', zorder=3)
-dh.show(ax=ax1, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
+mera_outlines_2012.plot(ax=ax1, facecolor='none', edgecolor='k', zorder=3)
+dh.plot(ax=ax1, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax1.set_title('Before coregistration')
 
 ax2 = plt.subplot(122)
-mera_outlines_2012.show(ax=ax2, facecolor='none', edgecolor='k', zorder=3)
-dh_coreg.show(ax=ax2, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
+mera_outlines_2012.plot(ax=ax2, facecolor='none', edgecolor='k', zorder=3)
+dh_coreg.plot(ax=ax2, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax2.set_title('After coregistration')
 
 plt.tight_layout()
@@ -301,8 +301,8 @@ unknown_gl_mask = unknown_gl_outline.create_mask(dh)
 # Plot dh map and outline
 
 fig, ax = plt.subplots()
-dh_coreg.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax)
-unknown_gl_outline.show(ax=ax, facecolor='none', edgecolor='k')
+dh_coreg.plot(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax)
+unknown_gl_outline.plot(ax=ax, facecolor='none', edgecolor='k')
 plt.show()
 
 # Calculate hypsometric bins
