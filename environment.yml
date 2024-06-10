@@ -11,4 +11,4 @@ dependencies:
   - rasterio
   - geopandas
   - xdem=0.0.19
-  - geoutils=0.1.6
+  - geoutils=0.1.*
