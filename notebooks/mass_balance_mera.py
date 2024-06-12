@@ -15,9 +15,18 @@
 
 # # DEM coregistration and glacier geodetic mass balance with xdem
 #
-# ### This notebook showcases how to use xdem to coregister two DEMs and calculate the glacier geodetic mass balance of Mera glacier, Nepal, using two DEMs derived from Pleiades stereo images.
+# ## Beginner exercise
 #
+# <div class="alert alert-info" style="font-size:110%">
+#  <h3>Objectives</h3>
 #
+# This notebook showcases how to use xdem to:
+# - coregister two DEMs
+# - plot basic statistics of elevation change
+# - calculate the glacier geodetic mass balance.
+#  
+# For this, we rely on two DEMs derived from Pleiades stereo images over Mera glacier, Nepal.
+# </div>
 
 # ### Import the necessary modules
 
