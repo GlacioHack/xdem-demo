@@ -21,6 +21,7 @@
 #  <h3>Objectives</h3>
 #
 # This notebook showcases how to use xdem to:
+# - plot classical terrain attributes: slope, hillshade, curvature etc
 # - coregister two DEMs
 # - plot basic statistics of elevation change
 # - calculate the glacier geodetic mass balance.
@@ -53,17 +54,17 @@ plt.rcParams['image.interpolation'] = 'none'
 
 # #### Load all DEMs at once, cropping to the common extent, and reprojecting onto the 2018 DEM grid
 
-fn_dem_2012 = "../data/mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
-fn_dem_2018 = "../data/mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
-fn_ref_dem = "../data/mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
+fn_dem_2012 = "../../data/mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
+fn_dem_2018 = "../../data/mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
+fn_ref_dem = "../../data/mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
 dem_2012, dem_2018, ref_dem = gu.raster.load_multiple_rasters([fn_dem_2012, fn_dem_2018, fn_ref_dem], crop=True, ref_grid=1)
 
 
 # #### Load glacier outlines
 
-rgi_shpfile = "../data/mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
-mera_shpfile_2012 = "../data/mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
-mera_shpfile_2018 = "../data/mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
+rgi_shpfile = "../../data/mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
+mera_shpfile_2012 = "../../data/mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
+mera_shpfile_2018 = "../../data/mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
 rgi_outlines = gu.Vector(rgi_shpfile)
 mera_outlines_2012 = gu.Vector(mera_shpfile_2012)
 mera_outlines_2018 = gu.Vector(mera_shpfile_2018)
@@ -87,7 +88,40 @@ plt.show()
 
 # There are non-zeros elevation changes outside of glaciers => These DEMs need to be coregistered.
 
-# ## 2 - DEM coregistration
+# # 2 - Terrain attributes
+#
+# **xDEM** enables calculating many terrain attributes: slope, aspect, hillshade, curbature etc. The full list is available here: https://xdem.readthedocs.io/en/stable/terrain.html
+#
+# Here we will demonstrate a few of them.
+
+# ### Slope
+
+slope = xdem.terrain.slope(dem_2012)
+fig, ax = plt.subplots(figsize=(8, 6))
+slope.plot(cbar_title="Slope (degrees)")
+plt.show()
+
+# ### Aspect
+
+aspect = xdem.terrain.aspect(dem_2012)
+fig, ax = plt.subplots(figsize=(8, 6))
+aspect.plot(cbar_title="Aspect (degrees)", cmap="twilight")
+plt.show()
+
+# #### <span style='color:red '> **TO DO:** </span> 
+# 1) Plot the terrain rugosity
+# 2) Calculate the maximum slope (using `np.max`)  
+# Uncomment (remove the #) below.
+
+rugosity = xdem.terrain.rugosity(dem_2012)
+fig, ax = plt.subplots(figsize=(8, 6))
+rugosity.plot(cbar_title="Rugosity", cmap="viridis", vmax=2)
+plt.show()
+
+print("Maximum slope is:", np.max(slope))
+
+
+# ## 3 - DEM coregistration
 
 # #### Prepare inputs for coregistration
 # First we create a mask, i.e. a raster of same shape as our dh map, to mask pixels on glaciers. `gl_mask` is `True` on glaciers, `False` elsewhere.
@@ -175,7 +209,7 @@ print(f"After coregistration:\
       \n\tNMAD dh: {nmad_coreg:.2f}")
 # -
 
-# ## 3 - Geodetic mass balance of Mera glacier
+# ## 4 - Geodetic mass balance of Mera glacier
 #
 # ### Calculate mean dh over glaciers, per elevation bins
 # We use the function `xdem.volume.hypsometric_binning` (see brief documentation [here](https://xdem.readthedocs.io/en/stable/gen_modules/xdem.volume.html)) to calculate the mean (or median) value of dh within elevation bands. \
