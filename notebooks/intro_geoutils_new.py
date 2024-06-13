@@ -20,15 +20,12 @@
 # - running arithmetic operations on rasters
 # - rasterizing vectors, polygonizing rasters etc
 #
-# We will make use of the **geoutils** and **xdem** libraries. They are not "standard" Python libraries but were developed by glaciologists (R. Hugonnet, E. Mannerfelt, A. Dehecq), to make it easier to work with such data in Python. They are based upon the more known **rasterio/GDAL** and **geopandas** libraries.
-# - **geoutils** provides functionalities for working with raster/vector data.
-# - **xDEM** uses all functionnalities of geoutils and add additional tools specific to working with DEMs.
+# We will make use of the **geoutils** library. This is not a "standard" Python library but was developed by glaciologists (R. Hugonnet, E. Mannerfelt, A. Dehecq, A. Tedstone), to make it easier to work with geospatial data (raster, vector) in Python. They are based upon the more known **rasterio/GDAL** and **geopandas** libraries.
 #
 # The full documentation can be found at: \
 # https://geoutils.readthedocs.io. \
-# https://xdem.readthedocs.io.
 #
-# For more features, check the examples gallery on both geoutils and xdem's documentation.
+# For more features, check the examples gallery on the documentation.
 
 # ## Import the necessary modules
 
@@ -362,18 +359,3 @@ buffered_outlines = outlines_metric.buffer(500)
 plt.figure()
 buffered_outlines.plot()
 plt.show()
-# -
-
-# ### Lazy loading
-
-import os, psutil
-current_process = psutil.Process(os.getpid())
-print(f"Using {current_process.memory_info()[0] / 1024.**2} MB of RAM")
-rst_unload = gu.Raster(gu.examples.get_path('exploradores_aster_dem'))
-print(f"Using {current_process.memory_info()[0] / 1024.**2} MB of RAM")
-print(rst_unload.is_loaded)
-
-rst_unload.data
-print(f"Using {current_process.memory_info()[0] / 1024.**2} MB of RAM")
-
-
