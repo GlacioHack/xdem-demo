@@ -213,21 +213,21 @@ landsat_rgb.info()
 rast_test = landsat_b4.reproject(res=60)
 rast_test.info()
 
-# #### **Question:** What is the new raster height?
+# #### <span style='color:red '> **Question:** </span> What is the new raster height?
 
 # #### Change extent/bounds
 
 rast_test = landsat_b4.reproject(bounds={"left":483430.0, "bottom":3093260.0, "right":498190.0, "top":3102710.0})
 rast_test.info()
 
-# #### **Question:** What is the new raster height?
+# #### <span style='color:red '> **Question:** </span> What is the new raster height?
 
 # #### Change Coordinate Reference System (CRS) i.e. projection
 
 rast_test = landsat_b4.reproject(crs='epsg:4326')
 rast_test.info()
 
-# #### **Question:** What is the new pixel resolution? What are the units?
+# #### <span style='color:red '> **Question:** </span> What is the new pixel resolution? What are the units?
 
 # ### Reproject the outlines in the same coordinate system as DEMs
 
@@ -239,7 +239,7 @@ outlines_proj = outlines.reproject(crs=landsat_b4.crs)
 rast_test = landsat_b4.crop(crop_geom=(483530.0, 3093260.0, 498190.0, 3102730.0))
 rast_test.info()
 
-# #### **Question:** By how much does the left bound differ from the requested value?
+# #### <span style='color:red '> **Question:** </span> By how much does the left bound differ from the requested value?
 
 # ### Arithmetic operations
 #
@@ -251,7 +251,7 @@ plt.figure()
 calc_rast.plot()
 plt.show()
 
-# #### **Question:** What happens with white areas?
+# #### <span style='color:red '> **Question:** </span> What happens with white areas?
 
 # A solution is to change the data type before running the operation.
 
@@ -312,8 +312,6 @@ calc_rast.get_nanarray()
 # Exporting a raster to xarray or rasterio
 
 aster_dem.to_xarray()
-
-aster_dem.to_rio_dataset()
 
 # Exporting a raster to vector
 
