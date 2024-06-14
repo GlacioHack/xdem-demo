@@ -80,28 +80,30 @@ import geoutils as gu
 
 
 
-# ### Making a false color composition
+# ## Making a false color composition
 #
 # False color compositions with infrared are common to highlight elements in the infrared, in particular vegetation.
 #
 # ![Infrarouge.jpg](img/Infrarouge.jpg)  
 # *Infrared image, vegetation particularly stands out.*
 
+# #### Exploring the NIR band
 # <div class="alert alert-info" style="font-size:110%">
 #
-#   <ul>
-#     <li>Open the near infrared (NIR) band, acquired at the same time (file : T31UDQ_20190705T105031_B08_10m.tif).</li>
-#     <li>Compare the values of the pixels from the true color image and the one from the infrared band, using histograms.</li>
-#     <li>Display a false color composition (NIR, Red, Green), using a normalization of the NIR band.</li>
-#   </ul>
+# - Open the near infrared (NIR) band, acquired at the same time (file : T31UDQ_20190705T105031_B08_10m.tif).
+# - Compare the values of the pixels from the true color image and the one from the infrared band. You can use the function `show_hist` to plot histograms.
 #
 # </div>
 
-# #### Exploring the NIR band
 
 
 
 # #### Normalizing the NIR band
+#
+# <div class="alert alert-info" style="font-size:110%">
+#
+# - Create a function `normalize` to normalize the data in the NIR band between 0-255 and apply it to the opened band
+# </div>
 
 def normalize(rst):
     ...
@@ -111,7 +113,14 @@ def normalize(rst):
 
 # #### Creating the false color composite
 #
+# <div class="alert alert-info" style="font-size:110%">
+#
+#   <ul>
+#     <li>Display a false color composition (NIR, Red, Green), using the normalized NIR band.</li>
+#   </ul>
+#
 # Note: you can use function `Raster.split_bands` to first create single layer Rasters, then `Raster.from_array` to generate the composite.
+# </div>
 
 
 
@@ -162,8 +171,9 @@ def normalize(rst):
 # <div class="alert alert-info" style="font-size:110%">
 #
 #   <ul>
-#     <li>Apply a threshold to the NDVI to extract vegetated areas.</li>
-#     <li>Save extracted areas as vector files.</li>
+#     <li>Apply a threshold to the NDVI to extract vegetated areas (two cases below).</li>
+#     <li>Plot the results.</li>  
+#     <li>Save the extracted areas as vector files.</li>
 #   </ul>
 #
 # </div>
@@ -183,6 +193,17 @@ threshold_water = -0.9
 
 
 
-# ### BONUS - Use folium to plot results
+# ### BONUS - Use folium to plot the results
+#
+# <div class="alert alert-info" style="font-size:110%">
+#
+# - convert the NDVI Raster into a numpy array with Nan, projected into web mercator (ESRI:53004)
+# - create the interactive map with `geopandas.ds.explore` as above (easier)
+# - add a Folium image layer with `folium.raster_layers.ImageOverlay`. You need to set a colormap.
+# - display the colorbar using information from [this link](https://leafmap.org/notebooks/62_folium_colorbar/)
+# - save the output as an html file for later use
+# - Play with the different options to customize your plot
+#
+# </div>
 
 

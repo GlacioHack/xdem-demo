@@ -85,24 +85,21 @@ rgb_rst.data
 
 rgb_rst.plot()
 
-# ### Making a false color composition
+
+# ## Making a false color composition
 #
 # False color compositions with infrared are common to highlight elements in the infrared, in particular vegetation.
 #
 # ![Infrarouge.jpg](img/Infrarouge.jpg)  
 # *Infrared image, vegetation particularly stands out.*
 
+# #### Exploring the NIR band
 # <div class="alert alert-info" style="font-size:110%">
 #
-#   <ul>
-#     <li>Open the near infrared (NIR) band, acquired at the same time (file : T31UDQ_20190705T105031_B08_10m.tif).</li>
-#     <li>Compare the values of the pixels from the true color image and the one from the infrared band, using histograms.</li>
-#     <li>Display a false color composition (NIR, Red, Green), using a normalization of the NIR band.</li>
-#   </ul>
+# - Open the near infrared (NIR) band, acquired at the same time (file : T31UDQ_20190705T105031_B08_10m.tif).
+# - Compare the values of the pixels from the true color image and the one from the infrared band. You can use the function `show_hist` to plot histograms.
 #
 # </div>
-
-# #### Exploring the NIR band
 
 nir_rst = gu.Raster("../../data/PARIS/images/T31UDQ_20190705T105031_B08_10m.tif")
 nir_rst.plot()
@@ -113,6 +110,11 @@ show_hist(nir_rst.data, bins=50, ax=axes[1], label="PIR", alpha=0.3, histtype="s
 
 
 # #### Normalizing the NIR band
+#
+# <div class="alert alert-info" style="font-size:110%">
+#
+# - Create a function `normalize` to normalize the data in the NIR band between 0-255 and apply it to the opened band
+# </div>
 
 def normalize(rst):
     band_min, band_max = rst.data.min(), rst.data.max()
@@ -125,7 +127,14 @@ show_hist(nnir_rst.data, bins=50, label="PIR", alpha=0.3, histtype="stepfilled")
 
 # #### Creating the false color composite
 #
+# <div class="alert alert-info" style="font-size:110%">
+#
+#   <ul>
+#     <li>Display a false color composition (NIR, Red, Green), using the normalized NIR band.</li>
+#   </ul>
+#
 # Note: you can use function `Raster.split_bands` to first create single layer Rasters, then `Raster.from_array` to generate the composite.
+# </div>
 
 red, green, blue = rgb_rst.split_bands()
 
@@ -196,8 +205,9 @@ ndvi_clip.plot(cmap="RdYlGn")
 # <div class="alert alert-info" style="font-size:110%">
 #
 #   <ul>
-#     <li>Apply a threshold to the NDVI to extract vegetated areas.</li>
-#     <li>Save extracted areas as vector files.</li>
+#     <li>Apply a threshold to the NDVI to extract vegetated areas (two cases below).</li>
+#     <li>Plot the results.</li>  
+#     <li>Save the extracted areas as vector files.</li>
 #   </ul>
 #
 # </div>
@@ -230,6 +240,7 @@ type(classif_vect)
 
 classif_vect.ds
 
+# Rename column "raster_value" by "category"
 classif_vect.ds = classif_vect.ds.rename(columns={"raster_value": "category"})
 classif_vect.ds
 
@@ -237,7 +248,21 @@ classif_vect.plot(column="category")
 
 classif_vect.save("my_vegetation.gpkg")
 
-# ### BONUS - Use folium to plot results
+m = classif_vect.ds.explore("category", name="vegetation", legend=True)
+m
+
+# ### BONUS - Use folium to plot the results
+
+# <div class="alert alert-info" style="font-size:110%">
+#
+# - convert the NDVI Raster into a numpy array with Nan, projected into web mercator (ESRI:53004)
+# - create the interactive map with `geopandas.ds.explore` as above (easier)
+# - add a Folium image layer with `folium.raster_layers.ImageOverlay`. You need to set a colormap.
+# - display the colorbar using information from [this link](https://leafmap.org/notebooks/62_folium_colorbar/)
+# - save the output as an html file for later use
+# - Play with the different options to customize your plot
+#
+# </div>
 
 ndvi_reproj = ndvi_clip.reproject(crs="ESRI:53004")
 bounds = ndvi_reproj.get_bounds_projected("EPSG:4326")
@@ -246,23 +271,26 @@ ndvi_nan = ndvi_reproj.get_nanarray()
 plt.imshow(ndvi_nan)
 plt.colorbar()
 
+cmap = plt.get_cmap("viridis")
+cmap(0)
+
 # +
 import folium
 
 m = classif_vect.ds.explore("category", name="vegetation", legend=True)
 img = folium.raster_layers.ImageOverlay(
         name="NDVI",
-        image=ndvi_nan[0],
+        image=ndvi_nan,
         bounds=[[bounds.bottom, bounds.left], [bounds.top, bounds.right]],
-        #opacity=0.6,
-        interactive=True,
-        #cross_origin=False,
-        #zindex=1,
+        colormap=lambda x: cmap(x),
+        opacity=0.6,
     )
 m.add_child(img)
 folium.LayerControl().add_to(m)
 
 m
 # -
+m.save("test.html")
+
 
 
