@@ -12,3 +12,5 @@ dependencies:
   - geopandas
   - xdem=0.0.19
   - geoutils=0.1.*
+  - folium
+  - mapclassify
