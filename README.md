@@ -16,7 +16,8 @@ You can run the examples directly in your web browser without installing Python,
 - myBinder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/GlacioHack/xdem-demo.git/2024_ige) 
 - UGA Binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://binderhub.univ-grenoble-alpes.fr/v2/gh/GlacioHack/xdem-demo.git/2024_ige) 
 
-The folder `notebooks` contains several examples:
-- `intro_geoutils.ipynb` showcase the basic functionalities of geoutils and xdem, using sample data that comes with the code (the data is already downloaded on your computer).
-- `exercice1.ipynb` aims at applying the same tools to a different data set, provided during the tutorial. The solutions are provided in `exercice1_solution.ipynb`.
+**Description of the notebooks**
+The folder `notebooks` contains several examples. The examples are sorted for beginners or advanced users:
+- `intro_geoutils.ipynb` showcase the basic functionalities of geoutils, using sample data that comes with the code (the data is already downloaded on your computer). The solutions are provided in `intro_geoutils_solutions.ipynb` if appropriate.
 - `mass_balance_mera.ipynb` is an example on how to coregister two DEMs and a calculate a glacier geodetic mass balance using xdem. The solutions to the final exercise are provided in `mass_balance_mera_solutions.ipynb`.
+- a third notebook `makina/vegetation_paris.ipyng` further showcases raster analysis not related to DEMs.
