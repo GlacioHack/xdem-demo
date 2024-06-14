@@ -271,8 +271,8 @@ ndvi_nan = ndvi_reproj.get_nanarray()
 plt.imshow(ndvi_nan)
 plt.colorbar()
 
+# Create a colormap to be used
 cmap = plt.get_cmap("viridis")
-cmap(0)
 
 # +
 import folium
@@ -290,7 +290,8 @@ folium.LayerControl().add_to(m)
 
 m
 # -
-m.save("test.html")
+# Save to html
+m.save("vegetation_paris_output.html")
 
 
 

@@ -194,7 +194,7 @@ threshold_water = -0.9
 
 
 # ### BONUS - Use folium to plot the results
-#
+
 # <div class="alert alert-info" style="font-size:110%">
 #
 # - convert the NDVI Raster into a numpy array with Nan, projected into web mercator (ESRI:53004)
