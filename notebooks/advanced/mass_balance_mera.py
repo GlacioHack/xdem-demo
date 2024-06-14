@@ -221,3 +221,19 @@ plt.rcParams['image.interpolation'] = 'none'
 # ### Print results
 
 
+
+# ### BONUS - Use geopandas' explore and/or folium to plot the results
+
+
+# <div class="alert alert-info" style="font-size:110%">
+#
+# - create an interactive map of the RGI outlines with `rgi_outlines.ds.explore`. Use `style_kwds` to plot empty polygons with black edges. You can set a different background with argument `tiles` (list of options available [here](https://leaflet-extras.github.io/leaflet-providers/preview/)).
+# - convert the dh Raster into a numpy array with Nan, projected into web mercator (ESRI:53004). I suggest downsampling to 20 m for speed.
+# - add a Folium image layer with `folium.raster_layers.ImageOverlay`. You need to set a colormap.
+# - optionally, try displaying the colorbar using information from [this link](https://leafmap.org/notebooks/62_folium_colorbar/)
+# - save the output as an html file for later use
+# - Play with the different options to customize your plot
+#
+# </div>
+
+

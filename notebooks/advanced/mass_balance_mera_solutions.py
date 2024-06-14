@@ -63,17 +63,17 @@ plt.rcParams['image.interpolation'] = 'none'
 # All DEMs must be cropped to a common extent and reprojected onto the 2018 DEM grid. \
 # Note: you may use the function `gu.raster.load_multiple_rasters`.
 
-fn_dem_2012 = "../data/mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
-fn_dem_2018 = "../data/mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
-fn_ref_dem = "../data/mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
+fn_dem_2012 = "../../data/mb_Mera/rasters/Mera_Pleiades_2012-11-25_DEM_4m.tif"
+fn_dem_2018 = "../../data/mb_Mera/rasters/Mera_Pleiades_2018-10-28_DEM_4m.tif"
+fn_ref_dem = "../../data/mb_Mera/rasters/Mera_COP30_DEM_UTM45_data.tif"
 dem_2012, dem_2018, ref_dem = gu.raster.load_multiple_rasters([fn_dem_2012, fn_dem_2018, fn_ref_dem], crop=True, ref_grid=1)
 
 
 # #### Load glacier outlines: RGI outlines, Mera 2012 and Mera 2018 outlines
 
-rgi_shpfile = "../data/mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
-mera_shpfile_2012 = "../data/mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
-mera_shpfile_2018 = "../data/mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
+rgi_shpfile = "../../data/mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp"
+mera_shpfile_2012 = "../../data/mb_Mera/glacier_outlines/Mera_outline_2012_realigned.shp"
+mera_shpfile_2018 = "../../data/mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp"
 rgi_outlines = gu.Vector(rgi_shpfile)
 mera_outlines_2012 = gu.Vector(mera_shpfile_2012)
 mera_outlines_2018 = gu.Vector(mera_shpfile_2018)
@@ -375,5 +375,49 @@ print(f"Total volume change: {dV:.2f} m\u00b3")
 print(f"Total mass change: {dM/1e3:.2f} t")
 print(f"Specific mass balance: {dh_mwe:.1f} m w.e.")
 
+# ### BONUS - Use geopandas' explore and/or folium to plot the results
 
 
+# <div class="alert alert-info" style="font-size:110%">
+#
+# - create an interactive map of the RGI outlines with `rgi_outlines.ds.explore`. Use `style_kwds` to plot empty polygons with black edges. You can set a different background with argument `tiles` (list of options available [here](https://leaflet-extras.github.io/leaflet-providers/preview/)).
+# - convert the dh Raster into a numpy array with Nan, projected into web mercator (ESRI:53004). I suggest downsampling to 20 m for speed.
+# - add a Folium image layer with `folium.raster_layers.ImageOverlay`. You need to set a colormap.
+# - optionally, try displaying the colorbar using information from [this link](https://leafmap.org/notebooks/62_folium_colorbar/)
+# - save the output as an html file for later use
+# - Play with the different options to customize your plot
+#
+# </div>
+
+# Prepare data for plotting: reproject, convert to nan array and get WGS84 bounds
+# Downsample dh map to 20 m for speed
+dh_reproj = dh_coreg.reproject(crs="ESRI:53004", res=20)
+bounds = dh_reproj.get_bounds_projected("EPSG:4326")
+dh_nan = dh_reproj.get_nanarray()
+
+# Create a colormap to be used
+cmap = plt.get_cmap("RdYlBu")
+
+# +
+import folium
+
+# Initialize map with ds.explore (easier) and plot glacier contours
+m = rgi_outlines.ds.explore(style_kwds={"fill":False, "color": "black"}, name="RGI outlines", tiles="Esri.WorldImagery") #"area_km2", legend=True)
+
+# Add raster layer with Folium
+# Add normalization for the color scale
+img = folium.raster_layers.ImageOverlay(
+        name="dh",
+        image=dh_nan,
+        bounds=[[bounds.bottom, bounds.left], [bounds.top, bounds.right]],
+        colormap=lambda x: cmap(x / 30. / 2 + 0.5),
+        opacity=1,
+    )
+m.add_child(img)
+folium.LayerControl().add_to(m)
+
+# Display
+m
+# -
+
+m.save("Mera_map.html")
