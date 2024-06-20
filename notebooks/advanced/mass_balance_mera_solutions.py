@@ -114,15 +114,20 @@ gl_mask = rgi_outlines.buffer(100).create_mask(dh)
 # Then we mask pixels in steep slopes (> 40 degrees) and gross blunders (abs(dh) > 50).
 
 slope = xdem.terrain.slope(ref_dem)
-slope_mask = (slope.data < 40).filled(False)
-outlier_mask = (np.abs(dh.data) < 50).filled(False)
+slope_mask = (slope < 40)
+outlier_mask = (np.abs(dh) < 50)
 
 # We plot the final mask of pixels used for coregistration.
 
-inlier_mask = ~gl_mask.data.filled(False) & slope_mask & outlier_mask
+inlier_mask = ~gl_mask & slope_mask & outlier_mask
+
 plt.figure(figsize=(8, 8))
-plt.imshow(inlier_mask.squeeze())
+inlier_mask.plot()
 plt.show()
+
+# To avoid issues with some numpy functions later (np.median), convert to numpy array with nodata set to False
+
+inlier_mask = inlier_mask.data.filled(False)
 
 # Free memory (needed when running on binder)
 
