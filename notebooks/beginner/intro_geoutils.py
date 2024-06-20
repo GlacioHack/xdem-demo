@@ -66,8 +66,8 @@ aster_dem = gu.Raster(gu.examples.get_path("exploradores_aster_dem"))
 # ### <span style='color:red '> **TO DO:** </span> Run the same commands, but copy/paste the file path. Uncomment the lines below (remove the # symbol) and replace ... with the file path.
 
 # +
-# dem_2009 = gu.Raster(...)
-# dem_1990 = gu.Raster(...)
+# landsat_b4 = gu.Raster(...)
+# landsat_rgb = gu.Raster(...)
 # -
 
 # Vector files (e.g. ESRI shapefiles) can be loaded in one line with `gu.Vector(path_to_file)`.
@@ -316,6 +316,7 @@ aster_dem.to_xarray()
 # Exporting a raster to vector
 
 landsat_pc = landsat_rgb.reproject(res=200).to_pointcloud()
+plt.figure()
 landsat_pc.plot(column="b1", cmap="gray")
 plt.show()
 
@@ -357,3 +358,4 @@ buffered_outlines = outlines_metric.buffer(500)
 plt.figure()
 buffered_outlines.plot()
 plt.show()
+# -
