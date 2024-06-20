@@ -152,7 +152,7 @@ del slope, slope_mask, outlier_mask
 # Then we estimate the coregistration needed between our two Pleiades DEMs. \
 # Finally, we apply that coregistration to the 2012 DEM.
 
-coreg = xdem.coreg.NuthKaab() + xdem.coreg.VerticalShift(vshift_func=np.median)
+coreg = xdem.coreg.NuthKaab() + xdem.coreg.VerticalShift(vshift_reduc_func=np.median)
 coreg.fit(dem_2018, dem_2012, inlier_mask, verbose=True)
 dem_2012_coreg = coreg.apply(dem_2012)
 
