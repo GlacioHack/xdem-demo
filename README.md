@@ -15,7 +15,7 @@ jupyter notebook
 Note: you can replace the `mamba` commands with `conda` but mamba is faster.
 
 - Download the data:
-The data can be downloaded with the script `download_data.sh` or directly at [this link](https://filesender.renater.fr/?s=download&token=bc73932e-4999-4237-8554-2e1a8862fcd2/) (you then need to unzip the file and copy it in the same folder as the one containing the codes).
+The data can be downloaded with the script `download_data.sh` or directly at [this link](https://filesender.renater.fr/?s=download&token=bc73932e-4999-4237-8554-2e1a8862fcd2) (you then need to unzip the file and copy it in the same folder as the one containing the codes).
 
 **Running the examples from a Binder hub**
 You can run the examples directly in your web browser without installing Python, using [Binder](https://jupyter.org/binder). There are two options (valid at least until 29/06/2024):
