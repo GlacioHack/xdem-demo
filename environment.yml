@@ -10,6 +10,7 @@ dependencies:
   - matplotlib
   - rasterio
   - geopandas
+  - fiona
   - xdem=0.0.19
   - geoutils=0.1.*
   - ipympl   # for matplotlib widget, otherwise comment line in imports
