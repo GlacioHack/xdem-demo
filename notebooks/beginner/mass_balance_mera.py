@@ -127,22 +127,28 @@ plt.show()
 # ## 3 - DEM coregistration
 
 # #### Prepare inputs for coregistration
-# First we create a mask, i.e. a raster of same shape as our dh map, to mask pixels on glaciers. `gl_mask` is `True` on glaciers, `False` elsewhere.
+# First we create a mask, i.e. a raster of same shape as our dh map, to mask pixels on glaciers. `gl_mask` is `True` on glaciers, `False` elsewhere. \
+# Since the RGI outlines can be slightly inaccurate, it is recommended to use a 100 m buffer.
 
-gl_mask = rgi_outlines.create_mask(dh)
+gl_mask = rgi_outlines.buffer(100).create_mask(dh)
 
-# Then we mask pixels in steep slopes and gross blunders
+# Then we mask pixels in steep slopes (> 40 degrees) and gross blunders (abs(dh) > 50).
 
 slope = xdem.terrain.slope(ref_dem)
-slope_mask = (slope.data < 40).filled(False)
-outlier_mask = (np.abs(dh.data) < 50).filled(False)
+slope_mask = (slope < 40)
+outlier_mask = (np.abs(dh) < 50)
 
-# We plot the final mask of pixels used for coregistration
+# We plot the final mask of pixels used for coregistration.
 
-inlier_mask = ~gl_mask.data.filled(False) & slope_mask & outlier_mask
+inlier_mask = ~gl_mask & slope_mask & outlier_mask
+
 plt.figure(figsize=(8, 8))
-plt.imshow(inlier_mask.squeeze())
+inlier_mask.plot()
 plt.show()
+
+# To avoid issues with some numpy functions later (np.median), convert to numpy array with nodata set to False
+
+inlier_mask = inlier_mask.data.filled(False)
 
 # Free memory (needed when running on binder)
 
@@ -159,9 +165,9 @@ coreg = xdem.coreg.NuthKaab() + xdem.coreg.VerticalShift(vshift_reduc_func=np.me
 coreg.fit(dem_2018, dem_2012, inlier_mask, verbose=True)
 dem_2012_coreg = coreg.apply(dem_2012)
 
-# The results of the coregistration can be output like this
+# #### Print the output of the coregistration: offset in east and north direction, vertical offset.
 
-print(coreg.pipeline[0]._meta)
+print(coreg.pipeline[0].meta)
 
 # ### <span style='color:red '> **Question:** </span> How many iterations of the Nuth & Kaab algorithm were run?
 #
@@ -173,20 +179,27 @@ print(coreg.pipeline[0]._meta)
 dh_coreg = dem_2018 - dem_2012_coreg
 
 # +
-plt.figure(figsize=(10, 6))
-ax1 = plt.subplot(121)
-mera_outlines_2012.plot(ax=ax1, facecolor='none', edgecolor='k', zorder=3)
-dh.plot(ax=ax1, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
-ax1.set_title('Before coregistration')
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+mera_outlines_2012.plot(ax=axes[0], facecolor='none', edgecolor='k', zorder=3)
+dh.plot(ax=axes[0], cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', 
+        title="Before coregistration", zorder=1)
 
-ax2 = plt.subplot(122)
-mera_outlines_2012.plot(ax=ax2, facecolor='none', edgecolor='k', zorder=3)
-dh_coreg.plot(ax=ax2, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
-ax2.set_title('After coregistration')
+mera_outlines_2012.plot(ax=axes[1], facecolor='none', edgecolor='k', zorder=3)
+dh_coreg.plot(ax=axes[1], cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', 
+        title="After coregistration", zorder=1)
 
 plt.tight_layout()
 plt.show()
+
+fig, ax = plt.subplots(1, 1)
+rgi_outlines.plot(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
+mera_outlines_2012.plot(ax=ax, facecolor='none', edgecolor='k', zorder=3)
+dh_coreg.plot(ax=ax, cmap='RdYlBu', vmin=-4, vmax=4, cbar_title='Elevation change 2012 - 2018 (m)', 
+        title="After coreg - detailed", zorder=1)
+plt.tight_layout()
+plt.show()
 # -
+
 
 # #### We see that elevation changes outside glaciers are close to zero (yellow color).
 
@@ -227,7 +240,8 @@ ddem_bins = xdem.volume.hypsometric_binning(dh_coreg[mera_mask], ref_dem[mera_ma
 print(ddem_bins)
 
 # ### Calculate the glacier area within each elevation bin
-# This is particularly needed for data with gaps, as the values in `ddem_bins['count']` are the number of pixels with observations, not total pixel count.
+# We use the function `xdem.volume.calculate_hypsometry_area`. \
+# This is particularly needed for data with gaps, as the values in `ddem_bins['count']` are the number of pixels with observations, not total pixel count. \
 # The result is in m$^2$.
 
 bins_area = xdem.volume.calculate_hypsometry_area(ddem_bins, ref_dem[mera_mask], pixel_size=dh_coreg.res)

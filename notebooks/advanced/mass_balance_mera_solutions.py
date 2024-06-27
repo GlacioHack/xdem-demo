@@ -147,7 +147,7 @@ dem_2012_coreg = coreg.apply(dem_2012)
 
 # #### Print the output of the coregistration: offset in east and north direction, vertical offset.
 
-print(coreg.pipeline[0]._meta)
+print(coreg.pipeline[0].meta)
 
 # ### <span style='color:red '> **Question:** </span> How many iterations of the Nuth & Kaab algorithm were run?
 #
