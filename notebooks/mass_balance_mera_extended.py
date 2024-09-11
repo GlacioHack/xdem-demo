@@ -15,21 +15,29 @@
 
 # # DEM coregistration and glacier geodetic mass balance with xdem
 #
-# ### This notebook showcases how to use xdem to coregister two DEMs and calculate the glacier geodetic mass balance of Mera glacier, Nepal, using two DEMs derived from Pleiades stereo images.
+# <div class="alert alert-info" style="font-size:110%">
+# <h3>This notebook showcases how to use xdem to coregister two DEMs and calculate the glacier geodetic mass balance of Mera glacier, Nepal, using two DEMs derived from Pleiades stereo images.</h3>
 #
-#
+# In particular, you will learn how to:
+# - coregister two DEMs
+# - plot basic statistics of elevation change
+# - calculate the glacier geodetic mass balance
+# - calculate the uncertainty of this mass balance.
+#  </div>
 
 # ### Import the necessary modules
 
 # +
 import matplotlib.pyplot as plt
 import numpy as np
-# %matplotlib widget
 
 import geoutils as gu
 import xdem
 
-# To avoid interpolation in plt.imshow
+# for interactive plots only, in case of issues with plots, comment this line and restart the kernel
+# %matplotlib widget  
+
+# To prevent interpolation in plots
 plt.rcParams['image.interpolation'] = 'none'
 # -
 
@@ -70,34 +78,41 @@ dh = dem_2018 - dem_2012
 vmax=30
 plt.figure(figsize=(10, 10))
 ax = plt.subplot(111)
-rgi_outlines.show(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
-mera_outlines_2012.show(ax=ax, facecolor='none', edgecolor='k', zorder=3)
-dh.show(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
+rgi_outlines.plot(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
+mera_outlines_2012.plot(ax=ax, facecolor='none', edgecolor='k', zorder=3)
+dh.plot(ax=ax, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax.set_title('Mera glacier and surroundings')
 plt.tight_layout()
 plt.show()
 
-# There are non-zeros elevation changes outside of glaciers => These DEMs need to be coregistered.
+# ### There are non-zeros elevation changes outside of glaciers => These DEMs need to be coregistered.
 
 # ## 2 - DEM coregistration
 
 # #### Prepare inputs for coregistration
-# First we create a mask, i.e. a raster of same shape as our dh map, to mask pixels on glaciers. `gl_mask` is `True` on glaciers, `False` elsewhere.
+# First we create a mask, i.e. a raster of same shape as our dh map, to mask pixels on glaciers. `gl_mask` is `True` on glaciers, `False` elsewhere. \
+# Since the RGI outlines can be slightly inaccurate, it is recommended to use a 100 m buffer. Because the outlines are lat/lon, they need to be reprojected to a metric system such as UTM beforehand.
 
-gl_mask = rgi_outlines.create_mask(dh)
+rgi_metric = rgi_outlines.reproject(crs=rgi_outlines.get_metric_crs())
+gl_mask = rgi_metric.buffer(100).create_mask(dh)
 
-# Then we mask pixels in steep slopes and gross blunders
+# Then we mask pixels in steep slopes (> 40 degrees) and gross blunders (abs(dh) > 50).
 
 slope = xdem.terrain.slope(ref_dem)
-slope_mask = (slope.data < 40).filled(False)
-outlier_mask = (np.abs(dh.data) < 50).filled(False)
+slope_mask = (slope < 40)
+outlier_mask = (np.abs(dh) < 50)
 
-# We plot the final mask of pixels used for coregistration
+# We plot the final mask of pixels used for coregistration.
 
-inlier_mask = ~gl_mask.data.data & slope_mask & outlier_mask
+inlier_mask = ~gl_mask & slope_mask & outlier_mask
+
 plt.figure(figsize=(8, 8))
-plt.imshow(inlier_mask.squeeze())
+inlier_mask.plot()
 plt.show()
+
+# To avoid issues with some numpy functions later (np.median), convert to numpy array with nodata set to False
+
+inlier_mask = inlier_mask.data.filled(False)
 
 # Free memory (needed when running on binder)
 
@@ -110,16 +125,17 @@ del slope, slope_mask, outlier_mask
 # Then we estimate the coregistration needed between our two Pleiades DEMs. \
 # Finally, we apply that coregistration to the 2012 DEM.
 
-coreg = xdem.coreg.NuthKaab() + xdem.coreg.VerticalShift(vshift_func=np.median)
+coreg = xdem.coreg.NuthKaab() + xdem.coreg.Deramp(poly_order=1)
 coreg.fit(dem_2018, dem_2012, inlier_mask, verbose=True)
 dem_2012_coreg = coreg.apply(dem_2012)
 
-# The results of the coregistration can be output like this
+# #### Print the output of the coregistration: offset in east and north direction, vertical offset.
 
-print(coreg.pipeline[0]._meta)
+print(coreg.pipeline[0].meta)
 
-# ### <span style='color:red '> **Question:** </span> How many iterations of the Nuth & Kaab algorithm were run?
-#
+# ### <span style='color:red '> **Questions:** </span> 
+# - How many iterations of the Nuth & Kaab algorithm were run?
+# - What is the final horizontal offset that is estimated, in meters?
 
 # #### Answer: ...
 
@@ -128,25 +144,32 @@ print(coreg.pipeline[0]._meta)
 dh_coreg = dem_2018 - dem_2012_coreg
 
 # +
-plt.figure(figsize=(10, 6))
-ax1 = plt.subplot(121)
-mera_outlines_2012.show(ax=ax1, facecolor='none', edgecolor='k', zorder=3)
-dh.show(ax=ax1, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
-ax1.set_title('Before coregistration')
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+mera_outlines_2012.plot(ax=axes[0], facecolor='none', edgecolor='k', zorder=3)
+dh.plot(ax=axes[0], cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', 
+        title="Before coregistration", zorder=1)
 
-ax2 = plt.subplot(122)
-mera_outlines_2012.show(ax=ax2, facecolor='none', edgecolor='k', zorder=3)
-dh_coreg.show(ax=ax2, cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
-ax2.set_title('After coregistration')
+mera_outlines_2012.plot(ax=axes[1], facecolor='none', edgecolor='k', zorder=3)
+dh_coreg.plot(ax=axes[1], cmap='RdYlBu', vmin=-vmax, vmax=vmax, cbar_title='Elevation change 2012 - 2018 (m)', 
+        title="After coregistration", zorder=1)
 
+plt.tight_layout()
+plt.show()
+
+fig, ax = plt.subplots(1, 1)
+rgi_outlines.plot(ax=ax, facecolor='none', edgecolor='k', lw=0.5, zorder=2)
+mera_outlines_2012.plot(ax=ax, facecolor='none', edgecolor='k', zorder=3)
+dh_coreg.plot(ax=ax, cmap='RdYlBu', vmin=-4, vmax=4, cbar_title='Elevation change 2012 - 2018 (m)', 
+        title="After coreg - detailed", zorder=1)
 plt.tight_layout()
 plt.show()
 # -
 
+
 # #### We see that elevation changes outside glaciers are close to zero (yellow color).
 
 # ### Calculate statistics of before/after coregistration
-# Because `dh.data` is a masked array, we use `compressed()` to output only unmasked values.
+# Note that all calculations ignore masked values.
 
 # +
 inlier_orig = dh[inlier_mask]
@@ -182,7 +205,8 @@ ddem_bins = xdem.volume.hypsometric_binning(dh_coreg[mera_mask], ref_dem[mera_ma
 print(ddem_bins)
 
 # ### Calculate the glacier area within each elevation bin
-# This is particularly needed for data with gaps, as the values in `ddem_bins['count']` are the number of pixels with observations, not total pixel count.
+# We use the function `xdem.volume.calculate_hypsometry_area`. \
+# This is particularly needed for data with gaps, as the values in `ddem_bins['count']` are the number of pixels with observations, not total pixel count. \
 # The result is in m$^2$.
 
 bins_area = xdem.volume.calculate_hypsometry_area(ddem_bins, ref_dem[mera_mask], pixel_size=dh_coreg.res)
@@ -233,7 +257,7 @@ dM = 0.85 * dV  # in kg
 # In meter water equivalent (m w.e.)
 # We divide by the average area between the two dates.
 
-mean_area = float((mera_outlines_2012.ds.Area + mera_outlines_2018.ds.Area) / 2)
+mean_area = float((mera_outlines_2012.ds.Area[0] + mera_outlines_2018.ds.Area[0]) / 2)
 dh_mwe = dM / mean_area
 
 # ### Print results
@@ -243,7 +267,7 @@ print(f"Total mass change: {dM/1e3:.2f} t")
 print(f"Specific mass balance: {dh_mwe:.1f} m w.e.")
 
 
-# ### What about uncertainties?
+# # 4) What about uncertainties?
 #
 # No systematic uncertainties, as the co-registration artificially set the median elevation difference to zero on the stable terrain. One can assume random uncertainties to have three independent sources: elevation change uncertainty ($\sigma _{\Delta z}$), delineation uncertainty ($\sigma _A$) and volume-to-mass density conversion uncertainty ($\sigma _\rho$).
 #
@@ -307,9 +331,9 @@ sigma_dh_mwe = sigma_dM/mean_area
 print(f"Specific mass balance: {dh_mwe:.1f} +/- {sigma_dh_mwe:.1f} m w.e.")
 # -
 
-# ### Actually, there are some strong assumptions behing what we did above...
+# ### Actually, there are some strong assumptions behind what we did above...
 #
-# And while it gives a reasonable first guess, one would want to account for the heteroscedasticity and spatial correlation of the elevation errors... some general ideas below, but if you want to explore this in more details, best is to refer to the very complete xdem documentation (https://xdem.readthedocs.io/), xdem advanced tutorials and the study by Hugonnet et al. (2022): https://doi.org/10.1109/jstars.2022.3188922
+# And while it gives a reasonable first guess, one would want to account for the heteroscedasticity and spatial correlation of the elevation errors... some general ideas below, but if you want to explore this in more details, best is to refer to the very complete xdem documentation (https://xdem.readthedocs.io/), xdem advanced tutorials and the study by Hugonnet et al. (2022): https://doi.org/10.1109/jstars.2022.3188922.
 #
 # Propagating elevation errors spatially accounting for heteroscedasticity and spatial correlation is complex. It requires computing the pairwise correlations between all points of an area of interest (be it for a sum, mean, or other operation), which is computationally intensive. Here, we rely on published formulations to perform computationally-efficient spatial propagation for the mean of elevation (or elevation differences) in an area.
 #
@@ -317,30 +341,76 @@ print(f"Specific mass balance: {dh_mwe:.1f} +/- {sigma_dh_mwe:.1f} m w.e.")
 #
 # We load the same data, and perform the same calculations on heteroscedasticity and spatial correlations of errors as in the Elevation error map and Spatial correlation of errors examples.
 
+# +
 slope, maximum_curvature = xdem.terrain.get_terrain_attribute(dem_2018, attribute=["slope", "maximum_curvature"])
+
+#dh_arr = dh_coreg[~gl_mask].filled(np.nan)
+#slope_arr = slope[~gl_mask].filled(np.nan)
+#maxc_arr = maximum_curvature[~gl_mask].filled(np.nan)
+
+# -
+
+slope_bins = np.nanquantile(slope[~gl_mask].filled(np.nan), np.linspace(0, 1, 30))
+maxc_bins = np.nanquantile(maximum_curvature[~gl_mask].filled(np.nan), np.linspace(0.05, 0.95, 30))
+print(maxc_bins)
 errors, df_binning, error_function = xdem.spatialstats.infer_heteroscedasticity_from_stable(
-    dvalues=dh_coreg, list_var=[slope, maximum_curvature], list_var_names=["slope", "maxc"], unstable_mask=rgi_outlines
+    dvalues=dh_coreg, list_var=[slope, maximum_curvature], list_var_names=["slope", "maxc"], list_var_bins=[slope_bins, maxc_bins], unstable_mask=rgi_outlines
 )
+
+xdem.spatialstats.plot_2d_binning(
+    df_binning,
+    var_name_1="slope",
+    var_name_2="maxc",
+    statistic_name="nmad",
+    label_var_name_1="Slope (degrees)",
+    label_var_name_2="Maximum absolute curvature (100 m$^{-1}$)",
+    label_statistic="NMAD of dh (m)",
+)
+
+# #### We see that the error (NMAD) increases for steep slopes and for large curvatures -> This error is calculated for each pixel and saved in the raster `errors`.
+
+plt.figure()
+errors.plot(cmap="Reds", cbar_title="Modeled error (m)")
+plt.show()
 
 # We use the error map to standardize the elevation differences before variogram estimation, following Equation 12 of Hugonnet et al. (2022), which is more robust as it removes the variance variability due to heteroscedasticity.
 
+# Computation takes about 2 min on 4 cores
 zscores = dh / errors
 emp_variogram, params_variogram_model, spatial_corr_function = xdem.spatialstats.infer_spatial_correlation_from_stable(
-    dvalues=zscores, list_models=["Gaussian", "Spherical"], unstable_mask=rgi_outlines, random_state=42
+    dvalues=zscores, list_models=["Gaussian", "Spherical"], unstable_mask=rgi_outlines, random_state=42, subsample=2000, n_jobs=4, n_variograms=8,
 )
+
+emp_variogram, params_variogram_model
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+xdem.spatialstats.plot_variogram(
+    emp_variogram,
+    xscale_range_split=[300, 3000],
+    ax=ax,
+)
+plt.tight_layout()
+plt.show()
+#     list_fit_fun=[spatial_corr_function,],
+#    list_fit_fun_label=["Variogram model"],
+print(params_variogram_model)
 
 # With our estimated heteroscedasticity and spatial correlation, we can now perform the spatial propagation of errors. The best estimation of the standard error for Mera Glacier is done by directly providing the shapefile, which relies on Equation 18 of Hugonnet et al. (2022).
 
-areas=[gu.Vector(mera_shpfile_2012).ds[gu.Vector(mera_shpfile_2012).ds["Area"]>0],]
-areas
+mera_area = float(mera_outline["Area"].values[0])
+print(f"Mera area: {mera_area} m^2")
+
+stderr_gla = xdem.spatialstats.spatial_error_propagation(
+    areas=[mera_area,], errors=errors, params_variogram_model=params_variogram_model
+)
+print(f"The error (1-sigma) in mean elevation change for Mera is {stderr_gla[0]:.2f} meters.")
 
 # +
-areas=[gu.Vector(mera_shpfile_2012).ds[gu.Vector(mera_shpfile_2012).ds["Area"]>0],]
-stderr_gla = xdem.spatialstats.spatial_error_propagation(
-    areas=areas, errors=errors, params_variogram_model=params_variogram_model
-)
-
-print(f"The error (1-sigma) in mean elevation change for Mera is {stderr_gla:.2f} meters.")
+# with this command, the memory explodes !
+# stderr_gla = xdem.spatialstats.spatial_error_propagation(
+#     areas=[mera_outline,], errors=errors, params_variogram_model=params_variogram_model
+# )
+# print(f"The error (1-sigma) in mean elevation change for Mera is {stderr_gla[0]:.2f} meters.")
 # -
 
 # When passing a numerical area value, we compute an approximation with disk shape from Equation 8 of Rolstad et al. (2009). This approximation is practical to visualize changes in elevation error when averaging over different area sizes, but is less accurate to estimate the standard error of a certain area shape.
@@ -349,6 +419,7 @@ areas = 10 ** np.linspace(1, 12)
 stderrs = xdem.spatialstats.spatial_error_propagation(
     areas=areas, errors=errors, params_variogram_model=params_variogram_model
 )
+plt.figure()
 plt.plot(areas / 10**6, stderrs)
 plt.xlabel("Averaging area (km²)")
 plt.ylabel("Standard error (m)")
@@ -383,8 +454,8 @@ plt.show()
 # 2. Try with different elevation bin sizes
 # 3. Try removing pixels whose value differ by more than five NMAD from the mean\
 # How sensitive are your results to these different parameters?\
-# Can your reproduce the results of Wagnon et al. (2021), JoG. Check the methods to see what bin size and filtering method they used. Your results should match their +/- 0.03 m w.e..
+# Can your reproduce the results of Wagnon et al. (2021), JoG. Check the methods to see what bin size and filtering method they used. Your results should match their +/- 0.05 m w.e..
 # 4. Try calculating the mass balance for another glacier.\
-# Hint 1: To select one glacier from the RGI outlines, use `rgi_outlines.ds[rgi_outlines.ds.RGIId == "YOUR_RGI_ID"]` where YOUR_RGI_ID is replaced by the ID of your chosen glacier, within the Pleiades DEM bounds.
+# Hint 1: To select one glacier from the RGI outlines, use `rgi_outlines.ds[rgi_outlines.ds["rgi_id"] == "YOUR_RGI_ID"]` where YOUR_RGI_ID is replaced by the ID of your chosen glacier, within the Pleiades DEM bounds.
 
 

@@ -15,11 +15,15 @@
 
 # # Manipulating raster/vector data with geoutils - Exercise & solutions
 
-# In this notebook, we apply the tools learnt in the `intro_geoutils` notebook to a different data set.
+# <div class="alert alert-info" style="font-size:110%">
+# <h3>Objectives</h3>
 #
-# We use the data from the Mera geodetic mass balance tutorials to be presented in the following days. They are available in the data folder "04_mb_Mera".\
+# In this notebook, we will apply the tools learnt in the `intro_geoutils_demo` notebook to a different data set.
+#
+# We rely on two DEMs derived from Pleiades stereo images over Mera glacier, Nepal, available in the data folder "mb_Mera".\
 # There are 2 Pleiades DEMs from November 2012 and October 2018.\
-# There are manual outlines of Mera glacier for the same dates and a sample of RGI outlines for the study area.
+# There are also manual outlines of Mera glacier for the same dates and a sample of the Randolph Glacier Inventory v7 outlines for the study area.
+#  </div> 
 
 
 # ## Import the necessary modules
@@ -27,10 +31,15 @@
 # +
 import matplotlib.pyplot as plt
 import numpy as np
-# %matplotlib widget
 
 import geoutils as gu
 import xdem
+
+# for interactive plots only, in case of issues with plots, comment this line and restart the kernel
+# %matplotlib widget
+
+# To prevent interpolation on plots
+plt.rcParams["image.interpolation"] = "none"
 # -
 
 # ## Loading the data ###
@@ -57,15 +66,15 @@ outlines_rgi = gu.Vector("../data/mb_Mera/RGI_shapefiles/Glacier_inventory_aroun
 #
 # Use the code cell below to type your commands and find the answer to the questions.
 
-print(dem_2012.info())
+dem_2012.info()
 
-print(dem_2018.info())
+dem_2018.info()
 
-print(dem_2012.crs.to_wkt())
+dem_2012.crs.to_wkt()
 
-print(outlines_2012.crs.to_wkt())
+outlines_2012.crs.to_wkt()
 
-print(outlines_rgi.crs.to_wkt())
+outlines_rgi.crs.to_wkt()
 
 # ### Answers:
 # => Both DEMs have the same spatial resolution: 4 m  
@@ -85,13 +94,13 @@ hillshade_2018 = xdem.terrain.hillshade(dem_2018)
 fig = plt.figure(figsize=(10,6))
 
 ax1 = plt.subplot(121)
-hillshade_2012.show(cmap='gray', add_cbar=False)
-outlines_2012.show(ax=ax1, facecolor='none', edgecolor='k')
+hillshade_2012.plot(cmap='gray', add_cbar=False)
+outlines_2012.plot(ax=ax1, facecolor='none', edgecolor='k')
 ax1.set_title('Mera glacier and 2012 DEM')
 
 ax2 = plt.subplot(122)
-hillshade_2018.show(ax=ax2, cmap='gray', add_cbar=False)
-outlines_2018.show(ax=ax2, facecolor='none', edgecolor='k')
+hillshade_2018.plot(ax=ax2, cmap='gray', add_cbar=False)
+outlines_2018.plot(ax=ax2, facecolor='none', edgecolor='k')
 ax2.set_title('Mera glacier and 2018 DEM')
 
 plt.tight_layout()
@@ -106,14 +115,14 @@ plt.show()
 
 slope = xdem.terrain.slope(dem_2018)
 fig, ax = plt.subplots(figsize=(8, 6))
-slope.show(cbar_title="Slope (degrees)")
+slope.plot(cbar_title="Slope (degrees)")
 plt.show()
 
 # #### Calculate and plot aspect for the 2018 DEM
 
 aspect = xdem.terrain.aspect(dem_2018)
 fig, ax = plt.subplots(figsize=(8, 6))
-aspect.show(cbar_title="Aspect (degrees)", cmap="twilight")
+aspect.plot(cbar_title="Aspect (degrees)", cmap="twilight")
 plt.show()
 
 # # Calculating the difference between the two DEMs
@@ -127,9 +136,9 @@ ddem = dem_2018 - dem_2012
 # ### Reproject the two DEMs on the same grid
 # Check afterwards that both DEM have same shape and georeferences.
 
-dem_2012_proj = dem_2012.reproject(dst_ref=dem_2018)
-print(dem_2012_proj.info())
-print(dem_2018.info())
+dem_2012_proj = dem_2012.reproject(ref=dem_2018)
+dem_2012_proj.info()
+dem_2018.info()
 
 # ### Now calculate the elevation change again
 
@@ -145,10 +154,10 @@ ddem = dem_2018 - dem_2012_proj
 
 plt.figure(figsize=(10, 10))
 ax = plt.subplot(111)
-outlines_2012.show(ax=ax, facecolor='none', edgecolor='b', zorder=2)
-outlines_2018.show(ax=ax, facecolor='none', edgecolor='r', zorder=3)
-outlines_rgi.show(ax=ax, facecolor='none', edgecolor='k', zorder=4)
-ddem.show(ax=ax, cmap='RdYlBu', vmin=-50, vmax=50, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
+outlines_2012.plot(ax=ax, facecolor='none', edgecolor='b', zorder=2)
+outlines_2018.plot(ax=ax, facecolor='none', edgecolor='r', zorder=3)
+outlines_rgi.plot(ax=ax, facecolor='none', edgecolor='k', zorder=4)
+ddem.plot(ax=ax, cmap='coolwarm_r', vmin=-50, vmax=50, cbar_title='Elevation change 2012 - 2018 (m)', zorder=1)
 ax.set_title('Thinning glaciers near Mera peak')
 plt.tight_layout()
 plt.show()
@@ -164,7 +173,7 @@ ddem.save("../data/tmp_Pleiades_2012_2018_dh.tif")
 
 glaciers_mask = outlines_rgi.create_mask(ddem)
 fig, ax = plt.subplots(figsize=(8, 6))
-glaciers_mask.show(add_cbar=False)
+glaciers_mask.plot(add_cbar=False)
 plt.show()
 
 # ### Calculate mean dh over glaciers or stable terrain
