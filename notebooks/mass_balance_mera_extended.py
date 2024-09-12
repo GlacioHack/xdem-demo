@@ -339,23 +339,23 @@ print(f"Specific mass balance: {dh_mwe:.1f} +/- {sigma_dh_mwe:.1f} m w.e.")
 #
 # References: Hugonnet et al. (2022), Figure S16, Equations 17–19 and Rolstad et al. (2009), Equation 8 (http://dx.doi.org/10.3189/002214309789470950).
 #
-# We load the same data, and perform the same calculations on heteroscedasticity and spatial correlations of errors as in the Elevation error map and Spatial correlation of errors examples.
+# We load the same data, and perform the same calculations on heteroscedasticity and spatial correlations of errors as in the "Elevation error map" and "Spatial correlation of errors" examples.
 
-# +
+# First, we calculate the main predictors of error: slope and maximum curvature.
+#
+
 slope, maximum_curvature = xdem.terrain.get_terrain_attribute(dem_2018, attribute=["slope", "maximum_curvature"])
 
-#dh_arr = dh_coreg[~gl_mask].filled(np.nan)
-#slope_arr = slope[~gl_mask].filled(np.nan)
-#maxc_arr = maximum_curvature[~gl_mask].filled(np.nan)
-
-# -
+# Second, we calculate the median dh in stable terrain (~= our error) as a function of slope and curvature by binning (grouping) the data.
+# We use 30 bins with even number of elements in each bin (quantiles).
 
 slope_bins = np.nanquantile(slope[~gl_mask].filled(np.nan), np.linspace(0, 1, 30))
 maxc_bins = np.nanquantile(maximum_curvature[~gl_mask].filled(np.nan), np.linspace(0.05, 0.95, 30))
-print(maxc_bins)
 errors, df_binning, error_function = xdem.spatialstats.infer_heteroscedasticity_from_stable(
     dvalues=dh_coreg, list_var=[slope, maximum_curvature], list_var_names=["slope", "maxc"], list_var_bins=[slope_bins, maxc_bins], unstable_mask=rgi_outlines
 )
+
+# We can plot the results like this.
 
 xdem.spatialstats.plot_2d_binning(
     df_binning,
@@ -373,15 +373,24 @@ plt.figure()
 errors.plot(cmap="Reds", cbar_title="Modeled error (m)")
 plt.show()
 
-# We use the error map to standardize the elevation differences before variogram estimation, following Equation 12 of Hugonnet et al. (2022), which is more robust as it removes the variance variability due to heteroscedasticity.
+# We use the error map to standardize the elevation differences before variogram estimation, following Equation 12 of Hugonnet et al. (2022), which is more robust as it removes the variance variability due to heteroscedasticity. \
+# **<span style='color:red '> **WARNING:** </span> If running on binder, due to memory limits, comment the first command and uncomment the second one. The second command is less reliable as it samples fewers points, but will require less memory and CPU.**
+#
 
 # Computation takes about 2 min on 4 cores
 zscores = dh / errors
 emp_variogram, params_variogram_model, spatial_corr_function = xdem.spatialstats.infer_spatial_correlation_from_stable(
     dvalues=zscores, list_models=["Gaussian", "Spherical"], unstable_mask=rgi_outlines, random_state=42, subsample=2000, n_jobs=4, n_variograms=8,
 )
+#emp_variogram, params_variogram_model, spatial_corr_function = xdem.spatialstats.infer_spatial_correlation_from_stable(
+#    dvalues=zscores, list_models=["Gaussian", "Spherical"], unstable_mask=rgi_outlines, random_state=42, subsample=2000, n_jobs=1, n_variograms=1,
+#)
 
-emp_variogram, params_variogram_model
+# The values of the empirical variogram are saved as a DataFrame in `emp_variogram` and the parameters of the modeled variogram are saved in `params_variogram_model`. The "range" corresponds to the distance of correlation of the errors, in meters, and the "psill" is the associated variance (square of the standard deviation) in meters.
+
+params_variogram_model
+
+# We can plot the empirical (and modeled??) variogram as follow. Note that because the spatial lag (distance between sampled points) can be very large, it is better for visualization of the short scale errors to split the y axis.
 
 fig, ax = plt.subplots(1, 1, figsize=(10, 8))
 xdem.spatialstats.plot_variogram(
@@ -393,11 +402,11 @@ plt.tight_layout()
 plt.show()
 #     list_fit_fun=[spatial_corr_function,],
 #    list_fit_fun_label=["Variogram model"],
-print(params_variogram_model)
 
 # With our estimated heteroscedasticity and spatial correlation, we can now perform the spatial propagation of errors. The best estimation of the standard error for Mera Glacier is done by directly providing the shapefile, which relies on Equation 18 of Hugonnet et al. (2022).
+# <span style='color:red '> **NOT done here. See below... Instead we use the area and circular approximation.** </span>
 
-mera_area = float(mera_outline["Area"].values[0])
+mera_area = float(mera_outlines_2012["Area"].values[0])
 print(f"Mera area: {mera_area} m^2")
 
 stderr_gla = xdem.spatialstats.spatial_error_propagation(
@@ -408,7 +417,7 @@ print(f"The error (1-sigma) in mean elevation change for Mera is {stderr_gla[0]:
 # +
 # with this command, the memory explodes !
 # stderr_gla = xdem.spatialstats.spatial_error_propagation(
-#     areas=[mera_outline,], errors=errors, params_variogram_model=params_variogram_model
+#     areas=[mera_outlines_2012,], errors=errors, params_variogram_model=params_variogram_model
 # )
 # print(f"The error (1-sigma) in mean elevation change for Mera is {stderr_gla[0]:.2f} meters.")
 # -
@@ -419,7 +428,7 @@ areas = 10 ** np.linspace(1, 12)
 stderrs = xdem.spatialstats.spatial_error_propagation(
     areas=areas, errors=errors, params_variogram_model=params_variogram_model
 )
-plt.figure()
+plt.figure(figsize=(10, 6))
 plt.plot(areas / 10**6, stderrs)
 plt.xlabel("Averaging area (km²)")
 plt.ylabel("Standard error (m)")
