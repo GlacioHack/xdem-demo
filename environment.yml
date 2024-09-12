@@ -11,8 +11,8 @@ dependencies:
   - rasterio
   - geopandas
   - fiona
-  - xdem=0.0.19
+  - xdem=0.0.20
   - geoutils=0.1.*
   - ipympl   # for matplotlib widget, otherwise comment line in imports
-  - folium
-  - mapclassify
+  # - folium
+  # - mapclassify
