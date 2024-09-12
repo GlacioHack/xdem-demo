@@ -23,8 +23,8 @@ For Linux/MacOS users, the data can be downloaded with the script `download_data
 
 **Running the examples from a Binder hub**
 You can run the examples directly in your web browser without installing Python, using [Binder](https://jupyter.org/binder). There are two options (valid at least until 12/10/2024):
-- myBinder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/GlacioHack/xdem-demo.git/2024_ige) 
-- UGA Binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://binderhub.univ-grenoble-alpes.fr/v2/gh/GlacioHack/xdem-demo.git/2024_ige) 
+- myBinder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/GlacioHack/xdem-demo.git/2024_esa) 
+- UGA Binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://binderhub.univ-grenoble-alpes.fr/v2/gh/GlacioHack/xdem-demo.git/2024_esa)
 
 **Description of the notebooks**
 The folder `notebooks` contains 3 notebooks:
