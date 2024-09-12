@@ -59,7 +59,7 @@ outlines_2012 = gu.Vector("../data/mb_Mera/glacier_outlines/Mera_outline_2012_re
 outlines_2018 = gu.Vector("../data/mb_Mera/glacier_outlines/Mera_outline_2018_realigned.shp")
 outlines_rgi = gu.Vector("../data/mb_Mera/RGI_shapefiles/Glacier_inventory_around_Mera.shp")
 
-# #### **Questions:** 
+# #### <span style='color:red '> **Questions:** </span> 
 # - What is the spatial resolution of the DEMs? Is it the same for both?
 # - What is the coordinate reference system of the DEMs and outlines? Is it the same for all?
 # - Are the DEM extents the same?
@@ -82,6 +82,14 @@ outlines_rgi.crs.to_wkt()
 # => The DEM extents differ and hence the raster sizes !
 
 # # Terrain attributes
+
+# **<span style='color:red '> **WARNING:** </span> If running on binder, due to memory limits, it is recommended to resample the DEMs at 10 m resolution for the rest of the notebook, by uncommenting the lines below.**
+#
+
+# +
+# dem_2012 = dem_2012.reproject(res=10)
+# dem_2018 = dem_2018.reproject(res=10)
+# -
 
 # #### Calculate the hillshade of 2012 and 2018 DEMs
 
@@ -107,7 +115,7 @@ plt.tight_layout()
 plt.show()
 # -
 
-# ### Comment what you see:
+# ### <span style='color:red '> **Question:** </span> Comment what you see.
 # - what are the white (transparent) areas on the figure?
 # - which DEM has a larger extent?
 
@@ -186,6 +194,6 @@ print(np.mean(ddem[glaciers_mask]))
 
 print(np.mean(ddem[~glaciers_mask]))
 
-# ### Can you explain what is the issue?
+# ### <span style='color:red '> **Question:** </span> can you explain what is the issue?
 
 

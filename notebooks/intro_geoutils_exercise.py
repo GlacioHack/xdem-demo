@@ -59,7 +59,7 @@ outlines_2012 = # use the command to load a Vector to open the 2012 outlines
 outlines_2018 = # use the command to load a Vector to open the 2018 outlines
 outlines_rgi = # use the command to load a Vector to open the RGI outlines
 
-# #### **Questions:** 
+# #### <span style='color:red '> **Questions:** </span> 
 # - What is the spatial resolution of the DEMs? Is it the same for both?
 # - What is the coordinate reference system of the DEMs and outlines? Is it the same for all?
 # - Are the DEM extents the same?
@@ -76,6 +76,14 @@ print(dem_2012.info())
 #
 
 # # Terrain attributes
+
+# **<span style='color:red '> **WARNING:** </span> If running on binder, due to memory limits, it is recommended to resample the DEMs at 10 m resolution for the rest of the notebook, by uncommenting the lines below.**
+#
+
+# +
+# dem_2012 = dem_2012.reproject(res=10)
+# dem_2018 = dem_2018.reproject(res=10)
+# -
 
 # #### Calculate the hillshade of 2012 and 2018 DEMs
 
@@ -97,7 +105,7 @@ plt.tight_layout()
 plt.show()
 # -
 
-# ### Comment what you see:
+# ### <span style='color:red '> **Question:** </span> Comment what you see.
 # - what are the white (transparent) areas on the figure?
 # - which DEM has a larger extent?
 
@@ -178,6 +186,6 @@ plt.show()
 # to be filled in
 # -
 
-# ### Can you explain what is the issue?
+# ### <span style='color:red '> **Question:** </span> can you explain what is the issue?
 
 
