@@ -22,9 +22,9 @@ Note: you can replace the `mamba` commands with `conda` but mamba is faster.
 For Linux/MacOS users, the data can be downloaded with the script `download_data.sh` found with the code. Alternatively, you can download it manually at [this link](https://filesender.renater.fr/download.php?token=00e59d13-98dc-4b7f-9ffd-92bb28e06987&files_ids=43430563). You then need to unzip the file and copy the extracted `data` folder in the same folder as the one containing the codes.
 
 **Running the examples from a Binder hub**
-You can run the examples directly in your web browser without installing Python, using [Binder](https://jupyter.org/binder). There are two options (valid at least until 12/10/2024):
-- myBinder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/GlacioHack/xdem-demo.git/2024_esa) 
-- UGA Binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://binderhub.univ-grenoble-alpes.fr/v2/gh/GlacioHack/xdem-demo.git/2024_esa)
+You can run the examples directly in your web browser without installing Python, using [Binder](https://jupyter.org/binder). Just use the following link :
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/GlacioHack/xdem-demo.git/2024_esa) (valid at least until 12/10/2024)
 
 **Description of the notebooks**
 The folder `notebooks` contains 3 notebooks:
