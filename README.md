@@ -28,6 +28,6 @@ You can run the examples directly in your web browser without installing Python,
 
 **Description of the notebooks**
 The folder `notebooks` contains 3 notebooks:
-- `intro_geoutils_demo.ipynb` showcases the basic functionalities of geoutils and xdem, using sample data that comes with the code (the data is already downloaded on your computer). The solutions are provided in `intro_geoutils_demo_solutions.ipynb`.
-- `intro_geoutils_exercise.ipnb` is another example similar to `intro_geoutils_demo.ipynb` with a different dataset to let you get experience with geoutils/xdem.
-- `mass_balance_mera.ipynb` is an example on how to coregister two DEMs and a calculate a glacier geodetic mass balance using xdem. The solutions to the final exercise are provided in `mass_balance_mera_solutions.ipynb`.
+- `intro_geoutils_demo.ipynb` showcases the basic functionalities of geoutils and xdem, using sample data that comes with the code (the data is already downloaded on your computer). 
+- `intro_geoutils_exercise.ipynb` is another example similar to `intro_geoutils_demo.ipynb` with a different dataset to let you get experience with geoutils/xdem. The solutions are provided in `intro_geoutils_solutions.ipynb`.
+- `mass_balance_mera_extended.ipynb` is an example on how to coregister two DEMs and a calculate a glacier geodetic mass balance using xdem. 
