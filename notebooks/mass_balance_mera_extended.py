@@ -275,13 +275,13 @@ print(f"Specific mass balance: {dh_mwe:.1f} m w.e.")
 #
 # For ($\sigma _{\Delta z}$) we make use of the stable terrain to quantify the elevation change's uncertainty.
 #
-# As a first (crude) approximation, and assuming that the glacier is larger than the squared decorrelation length of the random errors (Brun et al., 2016 - 10.1038%2FNGEO2999), one could simply take the standard deviation of the elevation change on the off-glacier terrain:
+# As a first guess, one could simply take the normalized median absolute deviation of the elevation change on the off-glacier terrain:
 
 # first approximation of uncertainty of elevation change
 sigma_dz = nmad_coreg # https://xdem.readthedocs.io/en/stable/intro_robuststats.html
-print(f"After coregistration NMAD:{sigma_dz:.2f}")
+print(f"After coregistration NMAD:{sigma_dz:.2f} m")
 
-# The uncertainty on the volume estimate can then be obtained from (Berthier et al., 2014 - 10.5194/tc-8-2275-2014):
+# Still as a first guess, the uncertainty on the volume estimate can then be obtained from (Berthier et al., 2014 - 10.5194/tc-8-2275-2014):
 #
 # $$\sigma _{\Delta V} = \sqrt((\sigma _{\Delta z}(p+5*(1-p))*A_{mean})^2+(\sigma _A \Delta z)^2) $$
 #
@@ -407,7 +407,7 @@ plt.show()
 # <span style='color:red '> **NOT done here. See below... Instead we use the area and circular approximation.** </span>
 
 mera_area = float(mera_outlines_2012["Area"].values[0])
-print(f"Mera area: {mera_area} m^2")
+print(f"Mera area: {mera_area} m\u00b2")
 
 stderr_gla = xdem.spatialstats.spatial_error_propagation(
     areas=[mera_area,], errors=errors, params_variogram_model=params_variogram_model
@@ -466,5 +466,6 @@ plt.show()
 # Can your reproduce the results of Wagnon et al. (2021), JoG. Check the methods to see what bin size and filtering method they used. Your results should match their +/- 0.05 m w.e..
 # 4. Try calculating the mass balance for another glacier.\
 # Hint 1: To select one glacier from the RGI outlines, use `rgi_outlines.ds[rgi_outlines.ds["rgi_id"] == "YOUR_RGI_ID"]` where YOUR_RGI_ID is replaced by the ID of your chosen glacier, within the Pleiades DEM bounds.
+# 5. Try calculating the mass balance of Mera for a different period, for example with the SRTM 30m and/or the COP30 30m DEMs (freely available here: https://opentopography.org/)
 
 
