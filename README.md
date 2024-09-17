@@ -6,20 +6,18 @@ It contains a set of Python notebooks to showcase how to handle georeferenced (r
 
 **Running the examples from your computer**
 
-- Installing mamba:
+- Installing mamba or anaconda (it should already be installed on your machine):
 If you don't already have conda and/or mamba (both are Python package managers) installed on your computer, you first need to install them. The instructions can be found at [this link](https://github.com/conda-forge/miniforge).
 
 - Download the code:
-The examples can be downloaded and run on your computer by installing the necessary packages with conda. Simply download the content of this repository at [this link](https://github.com/GlacioHack/xdem-demo/archive/refs/heads/2024_esa.zip) ("code" button on the top-right of this page) or in command-line `git clone -b 2024_esa https://github.com/GlacioHack/xdem-demo.git`, then run:
+The examples can be downloaded and run on your computer by installing the necessary packages with conda. Simply download the content of this repository at [this link](https://github.com/GlacioHack/xdem-demo/archive/refs/heads/2024_esa.zip) ("code" button on the top-right of this page) or in command-line `git clone -b 2024_esa https://github.com/GlacioHack/xdem-demo.git`. Using the conda console, change your directory to the newly downloaded folder, at the location of the file 'environment.yml' then run:
 ```
-mamba env create -f environment.yml
-mamba activate xdem-demo
+conda env create -f environment.yml
+conda activate xdem-demo
 jupyter notebook
 ```
-Note: you can replace the `mamba` commands with `conda` but mamba is faster.
-
-- Download the data:
-For Linux/MacOS users, the data can be downloaded with the script `download_data.sh` found with the code. Alternatively, you can download it manually at [this link](https://filesender.renater.fr/download.php?token=00e59d13-98dc-4b7f-9ffd-92bb28e06987&files_ids=43430563). You then need to unzip the file and copy the extracted `data` folder in the same folder as the one containing the codes.
+- Data:
+For the second and third notebooks you will need the data that is stored in the 'data' folder from the 'GeodeticMB_Kneib' folder that you downloaded at the start of the workshop. Copy this folder and paste it in the same location as the 'notebooks' folder.
 
 **Running the examples from a Binder hub**
 You can run the examples directly in your web browser without installing Python, using [Binder](https://jupyter.org/binder). Just use the following link :
