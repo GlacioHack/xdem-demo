@@ -10,7 +10,7 @@ It contains a set of Python notebooks to showcase how to handle georeferenced (r
 If you don't already have conda and/or mamba (both are Python package managers) installed on your computer, you first need to install them. The instructions can be found at [this link](https://github.com/conda-forge/miniforge).
 
 - Download the code:
-The examples can be downloaded and run on your computer by installing the necessary packages with conda. Simply download the content of this repository at [this link](https://github.com/GlacioHack/xdem-demo/archive/refs/heads/2024_esa.zip) ("code" button on the top-right of this page) or in command-line `git clone -b 2024_esa https://github.com/GlacioHack/xdem-demo.git`. Using the conda console, change your directory to the newly downloaded folder, at the location of the file 'environment.yml' then run:
+The examples can be downloaded and run on your computer by installing the necessary packages with conda. Simply download the content of this repository at [this link](https://github.com/GlacioHack/xdem-demo/archive/refs/heads/2024_esa.zip) ("code" button on the top-right of this page) or in command-line `git clone -b 2024_esa https://github.com/GlacioHack/xdem-demo.git`. Using the conda console, change your directory to the newly downloaded folder (using cd path/2/dir/), at the location of the file 'environment.yml' then run:
 ```
 conda env create -f environment.yml
 conda activate xdem-demo
